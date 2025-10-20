@@ -1,0 +1,94 @@
+# Dependencies
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Next.js
+.next
+out
+build
+.next/cache
+
+# Environment variables
+.env*
+
+# Debug
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Git
+.git
+.gitignore
+.github
+
+# Documentation
+README.md
+*.md
+LICENSE
+
+# Docker
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Development files
+.eslintrc*
+.prettierrc*
+tsconfig.json
+tailwind.config.*
+postcss.config.*
+next.config.*
+components.json
+
+# Test files
+*.test.*
+*.spec.*
+__tests__
+test
+tests
+coverage
+
+# Temporary files
+tmp
+temp
+.tmp
+*.tmp
+
+# Cache
+.cache
+.parcel-cache
+.next/cache
+.turbo
+
+# Data directory (will be created in container)
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Large binary files
+*.node
+*.dll
+*.so
+*.dylib
+
+# Package manager files
+package-lock.json.bak
+yarn.lock
+pnpm-lock.yaml
+
+# Misc
+*.tgz
+*.tar.gz

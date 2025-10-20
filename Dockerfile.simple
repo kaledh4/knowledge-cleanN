@@ -1,0 +1,29 @@
+FROM node:20-alpine
+
+WORKDIR /usr/src/app
+
+# Install runtime dependencies only
+RUN apk add --no-cache libc6-compat && rm -rf /var/cache/apk/*
+
+# Copy package files and install production deps
+COPY package*.json ./
+RUN npm ci --only=production --no-audit --no-fund && npm cache clean --force
+
+# Copy built application (build externally)
+COPY .next ./.next
+COPY public ./public
+COPY scripts ./scripts
+COPY migrations ./migrations
+
+# Set environment
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV DB_PATH=/usr/src/app/data/knowledge.db
+
+# Create data directory
+RUN mkdir -p /usr/src/app/data && chmod -R 777 /usr/src/app/data
+
+EXPOSE 3000
+VOLUME ["/usr/src/app/data"]
+
+CMD ["npm", "start"]
