@@ -101,6 +101,10 @@ export default function CustomizeTagsPage() {
   const [colorizingTag, setColorizingTag] = useState<string | null>(null);
   const [selectedColor, setSelectedColor] = useState(PRESET_COLORS[0]);
 
+  // New tag creation state
+  const [newTagNameToCreate, setNewTagNameToCreate] = useState('');
+  const [creatingTag, setCreatingTag] = useState(false);
+
   const filteredTags = tags.filter(tag =>
     tag.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -194,6 +198,52 @@ export default function CustomizeTagsPage() {
     } catch (error) {
       console.error('Error resetting tag color:', error);
       setMessage({ type: 'error', text: error.message || 'Failed to reset tag color' });
+    }
+  };
+
+  const handleCreateNewTag = async () => {
+    if (!newTagNameToCreate.trim()) {
+      setMessage({ type: 'error', text: 'Tag name cannot be empty' });
+      return;
+    }
+
+    // Check if tag already exists
+    if (tags.some(tag => tag.name.toLowerCase() === newTagNameToCreate.trim().toLowerCase())) {
+      setMessage({ type: 'error', text: 'This tag already exists' });
+      return;
+    }
+
+    try {
+      setCreatingTag(true);
+
+      // Create a new knowledge entry with just the tag (this will create the tag in the system)
+      const response = await fetch('/api/knowledge', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          source: `Tag created: ${newTagNameToCreate}`,
+          tags: [newTagNameToCreate.trim()],
+          title: `Tag: ${newTagNameToCreate}`,
+          enrichedContent: `This is a system entry created to initialize the tag "${newTagNameToCreate}". You can delete this entry if you don't need it.`
+        }),
+      });
+
+      if (response.ok) {
+        setMessage({ type: 'success', text: `Tag "${newTagNameToCreate}" created successfully` });
+        setNewTagNameToCreate('');
+        fetchTags(); // Refresh the tags list
+
+        // Optionally, automatically open color customization for the new tag
+        setColorizingTag(newTagNameToCreate.trim());
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to create tag');
+      }
+    } catch (error) {
+      console.error('Error creating tag:', error);
+      setMessage({ type: 'error', text: error.message || 'Failed to create tag' });
+    } finally {
+      setCreatingTag(false);
     }
   };
 
@@ -369,6 +419,59 @@ export default function CustomizeTagsPage() {
           </CardContent>
         </Card>
 
+        {/* Create New Tag */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Plus className="mr-2 h-5 w-5 text-green-500" />
+              Create New Tag
+            </CardTitle>
+            <CardDescription>
+              Add a new tag to your knowledge vault and optionally customize its color
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <Label className="text-sm font-medium">Tag Name</Label>
+                <Input
+                  placeholder="Enter new tag name..."
+                  value={newTagNameToCreate}
+                  onChange={(e) => setNewTagNameToCreate(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleCreateNewTag();
+                    }
+                  }}
+                  className="mt-1"
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  New tags will be available immediately across your knowledge vault
+                </div>
+                <Button
+                  onClick={handleCreateNewTag}
+                  disabled={!newTagNameToCreate.trim() || creatingTag}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  {creatingTag ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="mr-2 h-4 w-4" />
+                      Create Tag
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Tags Overview */}
         <Card className="mb-8">
           <CardHeader>
@@ -518,6 +621,15 @@ export default function CustomizeTagsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
+              <div className="flex items-start space-x-3">
+                <Plus className="h-5 w-5 text-green-500 mt-0.5" />
+                <div>
+                  <h3 className="font-semibold mb-1">Create New Tags</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Use the "Create New Tag" section to add new tags to your knowledge vault. New tags are immediately available for use.
+                  </p>
+                </div>
+              </div>
               <div className="flex items-start space-x-3">
                 <Edit3 className="h-5 w-5 text-blue-500 mt-0.5" />
                 <div>

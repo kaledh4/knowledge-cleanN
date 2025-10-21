@@ -14,7 +14,7 @@ type KnowledgeListProps = {
   refreshKey: number;
 };
 
-const PAGE_SIZE = 25;
+const PAGE_SIZE = 24;
 
 interface UsePaginatedEntriesResult {
   entries: KnowledgeEntry[];

@@ -12,28 +12,53 @@ interface TagColorsMap {
   [tagName: string]: TagColors;
 }
 
-export function useTagColors() {
-  const [tagColors, setTagColors] = useState<TagColorsMap>({});
-  const [loading, setLoading] = useState(true);
+// Cache colors globally to prevent loading delays
+let globalTagColors: TagColorsMap = {};
+let globalLoading = false;
+let globalLoadPromise: Promise<void> | null = null;
 
-  useEffect(() => {
-    fetchTagColors();
-  }, []);
+export function useTagColors() {
+  const [tagColors, setTagColors] = useState<TagColorsMap>(globalTagColors);
+  const [loading, setLoading] = useState(globalLoading);
 
   const fetchTagColors = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/tags/colors');
-      if (response.ok) {
-        const data = await response.json();
-        setTagColors(data.tagColors || {});
-      }
-    } catch (error) {
-      console.error('Error fetching tag colors:', error);
-    } finally {
-      setLoading(false);
+    if (globalLoadPromise) {
+      await globalLoadPromise;
+      return;
     }
+
+    globalLoadPromise = (async () => {
+      try {
+        globalLoading = true;
+        setLoading(true);
+        const response = await fetch('/api/tags/colors');
+        if (response.ok) {
+          const data = await response.json();
+          globalTagColors = data.tagColors || {};
+          setTagColors(globalTagColors);
+        }
+      } catch (error) {
+        console.error('Error fetching tag colors:', error);
+      } finally {
+        globalLoading = false;
+        setLoading(false);
+        globalLoadPromise = null;
+      }
+    })();
+
+    await globalLoadPromise;
   };
+
+  useEffect(() => {
+    // If we already have colors, no need to load again
+    if (Object.keys(globalTagColors).length > 0) {
+      setTagColors(globalTagColors);
+      setLoading(false);
+      return;
+    }
+
+    fetchTagColors();
+  }, []);
 
   const getTagClasses = (tagName: string): string => {
     // Check if user has custom colors for this tag
