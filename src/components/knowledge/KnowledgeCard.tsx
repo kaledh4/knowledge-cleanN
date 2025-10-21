@@ -38,6 +38,8 @@ export default function KnowledgeCard({ entry, onUpdate, onDelete }: KnowledgeCa
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
+  const { getTagClasses, getCardBorderColor, tagColors } = useTagColors();
+
   // Function to detect if text is Arabic
   const isArabic = (text: string): boolean => {
     const arabicRegex = /[\u0600-\u06FF]/;
@@ -74,8 +76,6 @@ export default function KnowledgeCard({ entry, onUpdate, onDelete }: KnowledgeCa
   };
 
   const primaryTagColor = entry.tags[0] ? getPrimaryTagColor(entry.tags[0]) : '#64748b';
-
-  const { getTagClasses, getCardBorderColor, tagColors } = useTagColors();
 
   const Icon = entry.type === 'TEXT' ? FileText : LinkIcon;
   
