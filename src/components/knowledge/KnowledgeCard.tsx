@@ -24,6 +24,7 @@ import EntryDialog from './EntryDialog';
 import ViewEntryDialog from './ViewEntryDialog';
 import DeleteConfirmationDialog from './DeleteConfirmationDialog';
 import { cn } from '@/lib/utils';
+import { useTagColors } from '@/hooks/useTagColors';
 
 type KnowledgeCardProps = {
   entry: KnowledgeEntry;
@@ -31,47 +32,13 @@ type KnowledgeCardProps = {
   onDelete: () => void;
 };
 
-const getTagClasses = (tag: Tag): string => {
-    switch (tag) {
-        case 'Important':
-            return 'border-red-500/40 bg-red-900/50 text-red-300 hover:bg-red-900/80';
-        case 'To Do Research On':
-            return 'border-yellow-500/40 bg-yellow-900/50 text-yellow-300 hover:bg-yellow-900/80';
-        case 'Learning':
-            return 'border-blue-500/40 bg-blue-900/50 text-blue-300 hover:bg-blue-900/80';
-        case 'AI':
-            return 'border-purple-500/40 bg-purple-900/50 text-purple-300 hover:bg-purple-900/80';
-        case 'Investing':
-            return 'border-green-500/40 bg-green-900/50 text-green-300 hover:bg-green-900/80';
-        default:
-            return 'border-accent/30 bg-accent/20 text-accent-foreground hover:bg-accent/30';
-    }
-}
-
-const getCardBorderColor = (tags: Tag[]): string => {
-    if (tags.length === 0) return '';
-    
-    const primaryTag = tags[0]; // Use the first tag for the card border
-    switch (primaryTag) {
-        case 'Important':
-            return 'border-l-red-500/60 border-l-4';
-        case 'To Do Research On':
-            return 'border-l-yellow-500/60 border-l-4';
-        case 'Learning':
-            return 'border-l-blue-500/60 border-l-4';
-        case 'AI':
-            return 'border-l-purple-500/60 border-l-4';
-        case 'Investing':
-            return 'border-l-green-500/60 border-l-4';
-        default:
-            return 'border-l-accent/40 border-l-4';
-    }
-}
 
 export default function KnowledgeCard({ entry, onUpdate, onDelete }: KnowledgeCardProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  const { getTagClasses, getCardBorderColor } = useTagColors();
 
   const Icon = entry.type === 'TEXT' ? FileText : LinkIcon;
   
@@ -116,7 +83,7 @@ export default function KnowledgeCard({ entry, onUpdate, onDelete }: KnowledgeCa
       <Card 
         className={cn(
           "flex h-full transform-gpu flex-col bg-card/70 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-primary/20 hover:shadow-lg cursor-pointer",
-          getCardBorderColor(entry.tags as Tag[])
+          getCardBorderColor(entry.tags[0] as Tag)
         )}
         onClick={handleCardClick}
       >

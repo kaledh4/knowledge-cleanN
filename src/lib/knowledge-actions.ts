@@ -66,7 +66,7 @@ export async function createKnowledgeEntry(data: {
 }
 
 export async function getKnowledgeEntries(
-  limit: number = 9,
+  limit: number = 24,
   cursor?: string,
   userId?: string
 ): Promise<{ entries: (KnowledgeEntry & { tags: Tag[] })[], nextCursor?: string }> {

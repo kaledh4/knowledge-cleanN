@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Brain, Edit3, Trash2, Tag as TagIcon, Search, Plus, Check, X, AlertCircle } from 'lucide-react';
+import { Brain, Edit3, Trash2, Tag as TagIcon, Search, Plus, Check, X, AlertCircle, Palette, RefreshCw } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,75 @@ interface TagData {
   usageCount: number;
 }
 
+interface TagColors {
+  backgroundColor: string;
+  borderColor: string;
+  textColor: string;
+}
+
+interface TagColorsMap {
+  [tagName: string]: TagColors;
+}
+
+const PRESET_COLORS = [
+  {
+    name: 'Red',
+    background: 'bg-red-900/50',
+    border: 'border-red-500/40',
+    text: 'text-red-300',
+    hex: '#dc2626'
+  },
+  {
+    name: 'Blue',
+    background: 'bg-blue-900/50',
+    border: 'border-blue-500/40',
+    text: 'text-blue-300',
+    hex: '#2563eb'
+  },
+  {
+    name: 'Green',
+    background: 'bg-green-900/50',
+    border: 'border-green-500/40',
+    text: 'text-green-300',
+    hex: '#16a34a'
+  },
+  {
+    name: 'Yellow',
+    background: 'bg-yellow-900/50',
+    border: 'border-yellow-500/40',
+    text: 'text-yellow-300',
+    hex: '#ca8a04'
+  },
+  {
+    name: 'Purple',
+    background: 'bg-purple-900/50',
+    border: 'border-purple-500/40',
+    text: 'text-purple-300',
+    hex: '#9333ea'
+  },
+  {
+    name: 'Pink',
+    background: 'bg-pink-900/50',
+    border: 'border-pink-500/40',
+    text: 'text-pink-300',
+    hex: '#ec4899'
+  },
+  {
+    name: 'Orange',
+    background: 'bg-orange-900/50',
+    border: 'border-orange-500/40',
+    text: 'text-orange-300',
+    hex: '#ea580c'
+  },
+  {
+    name: 'Teal',
+    background: 'bg-teal-900/50',
+    border: 'border-teal-500/40',
+    text: 'text-teal-300',
+    hex: '#14b8a6'
+  }
+];
+
 export default function CustomizeTagsPage() {
   const { data: session } = useSession();
   const [tags, setTags] = useState<TagData[]>([]);
@@ -27,12 +96,18 @@ export default function CustomizeTagsPage() {
   const [deletingTag, setDeletingTag] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  // Color management state
+  const [tagColors, setTagColors] = useState<TagColorsMap>({});
+  const [colorizingTag, setColorizingTag] = useState<string | null>(null);
+  const [selectedColor, setSelectedColor] = useState(PRESET_COLORS[0]);
+
   const filteredTags = tags.filter(tag =>
     tag.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   useEffect(() => {
     fetchTags();
+    fetchTagColors();
   }, []);
 
   const fetchTags = async () => {
@@ -50,6 +125,75 @@ export default function CustomizeTagsPage() {
       setMessage({ type: 'error', text: 'Failed to load tags. Please try again.' });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchTagColors = async () => {
+    try {
+      const response = await fetch('/api/tags/colors');
+      if (response.ok) {
+        const data = await response.json();
+        setTagColors(data.tagColors || {});
+      }
+    } catch (error) {
+      console.error('Error fetching tag colors:', error);
+    }
+  };
+
+  const handleSaveTagColor = async (tagName: string) => {
+    try {
+      const response = await fetch('/api/tags/colors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tagName,
+          backgroundColor: selectedColor.background,
+          borderColor: selectedColor.border,
+          textColor: selectedColor.text
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage({ type: 'success', text: data.message });
+        setTagColors({
+          ...tagColors,
+          [tagName]: {
+            backgroundColor: selectedColor.background,
+            borderColor: selectedColor.border,
+            textColor: selectedColor.text
+          }
+        });
+        setColorizingTag(null);
+      } else {
+        throw new Error(data.error || 'Failed to save tag color');
+      }
+    } catch (error) {
+      console.error('Error saving tag color:', error);
+      setMessage({ type: 'error', text: error.message || 'Failed to save tag color' });
+    }
+  };
+
+  const handleResetTagColor = async (tagName: string) => {
+    try {
+      const response = await fetch(`/api/tags/colors?tag=${encodeURIComponent(tagName)}`, {
+        method: 'DELETE'
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage({ type: 'success', text: data.message });
+        const newTagColors = { ...tagColors };
+        delete newTagColors[tagName];
+        setTagColors(newTagColors);
+      } else {
+        throw new Error(data.error || 'Failed to reset tag color');
+      }
+    } catch (error) {
+      console.error('Error resetting tag color:', error);
+      setMessage({ type: 'error', text: error.message || 'Failed to reset tag color' });
     }
   };
 
@@ -103,6 +247,13 @@ export default function CustomizeTagsPage() {
   };
 
   const getTagClasses = (tagName: string): string => {
+    // Check if user has custom colors for this tag
+    if (tagColors[tagName]) {
+      const colors = tagColors[tagName];
+      return `${colors.borderColor} ${colors.backgroundColor} ${colors.textColor} hover:opacity-80`;
+    }
+
+    // Default colors for known tags
     switch (tagName) {
       case 'Important':
         return 'border-red-500/40 bg-red-900/50 text-red-300 hover:bg-red-900/80';
@@ -301,6 +452,26 @@ export default function CustomizeTagsPage() {
                             size="sm"
                             variant="outline"
                             onClick={() => {
+                              setColorizingTag(tag.name);
+                              setSelectedColor(PRESET_COLORS[0]);
+                            }}
+                            className="relative"
+                          >
+                            <Palette className="h-4 w-4" />
+                            {tagColors[tag.name] && (
+                              <div className="absolute -top-1 -right-1 w-2 h-2 rounded-full"
+                                   style={{
+                                     backgroundColor: PRESET_COLORS.find(c =>
+                                       c.background === tagColors[tag.name].backgroundColor
+                                     )?.hex || '#000'
+                                   }}>
+                              </div>
+                            )}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
                               setEditingTag(tag.name);
                               setNewTagName(tag.name);
                             }}
@@ -366,17 +537,103 @@ export default function CustomizeTagsPage() {
                 </div>
               </div>
               <div className="flex items-start space-x-3">
+                <Palette className="h-5 w-5 text-purple-500 mt-0.5" />
+                <div>
+                  <h3 className="font-semibold mb-1">Customize Colors</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Click the palette button to choose custom colors for your tags. Custom colors are applied to all knowledge entries and card borders. A small dot appears on custom-colored tags.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start space-x-3">
                 <AlertCircle className="h-5 w-5 text-yellow-500 mt-0.5" />
                 <div>
                   <h3 className="font-semibold mb-1">Impact</h3>
                   <p className="text-sm text-muted-foreground">
-                    All changes are immediately reflected across your knowledge vault, including search results and filtering.
+                    All changes are immediately reflected across your knowledge vault, including search results, filtering, and visual styling.
                   </p>
                 </div>
               </div>
             </div>
           </CardContent>
         </Card>
+
+        {/* Color Customization Dialog */}
+        <Dialog open={!!colorizingTag} onOpenChange={(open) => !open && setColorizingTag(null)}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center">
+                <Palette className="mr-2 h-5 w-5 text-primary" />
+                Customize Tag Color
+              </DialogTitle>
+              <DialogDescription>
+                Choose a color for the tag "{colorizingTag}"
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-4">
+              <div>
+                <Label className="text-sm font-medium">Color Presets</Label>
+                <div className="grid grid-cols-4 gap-2 mt-2">
+                  {PRESET_COLORS.map((color) => (
+                    <button
+                      key={color.name}
+                      onClick={() => setSelectedColor(color)}
+                      className={`h-12 rounded-lg border-2 transition-all ${
+                        selectedColor.name === color.name
+                          ? 'border-primary scale-105'
+                          : 'border-transparent hover:border-gray-300'
+                      }`}
+                      style={{
+                        backgroundColor: color.hex + '20',
+                        borderColor: selectedColor.name === color.name ? color.hex : undefined
+                      }}
+                    >
+                      <div className="flex items-center justify-center h-full">
+                        <div
+                          className="w-6 h-6 rounded-full"
+                          style={{ backgroundColor: color.hex }}
+                        />
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium">Preview</Label>
+                <div className="mt-2 p-3 border rounded-lg">
+                  <Badge className={`${selectedColor.border} ${selectedColor.background} ${selectedColor.text}`}>
+                    {colorizingTag}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter className="flex justify-between">
+              <div>
+                {tagColors[colorizingTag!] && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleResetTagColor(colorizingTag!)}
+                  >
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Reset to Default
+                  </Button>
+                )}
+              </div>
+              <div className="space-x-2">
+                <Button variant="outline" onClick={() => setColorizingTag(null)}>
+                  Cancel
+                </Button>
+                <Button onClick={() => handleSaveTagColor(colorizingTag!)}>
+                  Apply Color
+                </Button>
+              </div>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );

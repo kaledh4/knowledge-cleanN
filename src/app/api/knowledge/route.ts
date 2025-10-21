@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
     const limitParam = searchParams.get('limit');
 
     // Validate and sanitize limit
-    let limit = 9;
+    let limit = 24;
     if (limitParam) {
       const parsedLimit = parseInt(limitParam);
       if (!isNaN(parsedLimit) && parsedLimit > 0 && parsedLimit <= 100) {
