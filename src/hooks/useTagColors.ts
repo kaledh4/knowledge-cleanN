@@ -22,7 +22,7 @@ export function useTagColors() {
   const [tagColors, setTagColors] = useState<TagColorsMap>(globalTagColors);
   const [loading, setLoading] = useState(globalLoading);
 
-  const fetchTagColors = async () => {
+  const fetchTagColors = async (forceRefresh = false) => {
     if (globalLoadPromise) {
       await globalLoadPromise;
       return;
@@ -32,7 +32,10 @@ export function useTagColors() {
       try {
         globalLoading = true;
         setLoading(true);
-        const response = await fetch('/api/tags/colors');
+
+        // Add cache busting for force refresh
+        const url = forceRefresh ? '/api/tags/colors?t=' + Date.now() : '/api/tags/colors';
+        const response = await fetch(url);
         if (response.ok) {
           const data = await response.json();
           globalTagColors = data.tagColors || {};
@@ -168,6 +171,7 @@ export function useTagColors() {
     loading,
     getTagClasses,
     getCardBorderColor,
-    refetch: fetchTagColors
+    refetch: () => fetchTagColors(false),
+    forceRefresh: () => fetchTagColors(true)
   };
 }

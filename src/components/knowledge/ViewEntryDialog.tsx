@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -41,7 +42,14 @@ const getTagClasses = (tag: Tag): string => {
 
 export default function ViewEntryDialog({ isOpen, setIsOpen, entry }: ViewEntryDialogProps) {
   const Icon = entry.type === 'TEXT' ? FileText : LinkIcon;
-  const { getTagClasses } = useTagColors();
+  const { getTagClasses, forceRefresh } = useTagColors();
+
+  // Force refresh colors when component mounts if they seem outdated
+  useEffect(() => {
+    if (entry.tags.length > 0) {
+      forceRefresh();
+    }
+  }, [entry.tags, forceRefresh]);
 
   // Function to detect if text is Arabic
   const isArabic = (text: string): boolean => {

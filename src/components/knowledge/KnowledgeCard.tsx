@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -38,7 +38,14 @@ export default function KnowledgeCard({ entry, onUpdate, onDelete }: KnowledgeCa
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-  const { getTagClasses, getCardBorderColor, tagColors } = useTagColors();
+  const { getTagClasses, getCardBorderColor, tagColors, forceRefresh } = useTagColors();
+
+  // Force refresh colors when component mounts if they seem outdated
+  useEffect(() => {
+    if (entry.tags.length > 0 && Object.keys(tagColors).length === 0) {
+      forceRefresh();
+    }
+  }, [entry.tags, tagColors, forceRefresh]);
 
   // Function to detect if text is Arabic
   const isArabic = (text: string): boolean => {

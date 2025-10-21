@@ -145,129 +145,259 @@ export default function Search({ onSearch }: SearchProps) {
   const showClearButton = query || selectedTags.length > 0;
 
   return (
-    <div className="w-full space-y-3 search-container">
-      {/* Search Input with Suggestions */}
-      <div className="relative">
-        <form onSubmit={handleSearch}>
-          <div className="relative">
-            <label htmlFor="search-query" className="sr-only">
-              Search your knowledge vault
-            </label>
-            <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              ref={searchInputRef}
-              id="search-query"
-              name="search-query"
-              type="search"
-              placeholder="Search your knowledge vault..."
-              className="w-full bg-background/50 pl-9 pr-9"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onFocus={() => setShowSuggestions(query.length > 2)}
-            />
-            {isLoading ? (
-              <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
-            ) : (
-              showClearButton && (
-                <button
-                  type="button"
-                  onClick={handleClear}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground"
-                  aria-label="Clear search"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )
+    <div className="w-full search-container">
+      {/* Compact Desktop Layout */}
+      <div className="hidden md:block">
+        <div className="flex gap-2 items-center">
+          {/* Search Input */}
+          <div className="relative flex-1">
+            <form onSubmit={handleSearch}>
+              <div className="relative">
+                <label htmlFor="search-query-desktop" className="sr-only">
+                  Search your knowledge vault
+                </label>
+                <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  ref={searchInputRef}
+                  id="search-query-desktop"
+                  name="search-query-desktop"
+                  type="search"
+                  placeholder="Search..."
+                  className="w-full bg-background/50 pl-9 pr-9 h-9"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onFocus={() => setShowSuggestions(query.length > 2)}
+                />
+                {isLoading ? (
+                  <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+                ) : (
+                  showClearButton && (
+                    <button
+                      type="button"
+                      onClick={handleClear}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+                      aria-label="Clear search"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )
+                )}
+              </div>
+            </form>
+
+            {/* Search Suggestions Dropdown */}
+            {showSuggestions && (
+              <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border rounded-md shadow-lg">
+                <div className="p-2 text-sm text-muted-foreground">
+                  Start typing to search your knowledge...
+                </div>
+              </div>
             )}
           </div>
-        </form>
 
-        {/* Search Suggestions Dropdown */}
-        {showSuggestions && (
-          <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border rounded-md shadow-lg">
-            <div className="p-2 text-sm text-muted-foreground">
-              Start typing to search your knowledge...
-            </div>
-          </div>
-        )}
+          {/* Tag Filter Button */}
+          <Popover open={tagPopoverOpen} onOpenChange={setTagPopoverOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="h-9">
+                <TagsIcon className="h-4 w-4 mr-1" />
+                {selectedTags.length > 0 && (
+                  <Badge variant="secondary" className="ml-1 px-1 py-0 text-xs">
+                    {selectedTags.length}
+                  </Badge>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-0" align="start">
+              <div className="p-3">
+                <div className="space-y-3">
+                  {/* Selected Tags */}
+                  {selectedTags.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {selectedTags.map((tag) => (
+                        <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+                          {tag}
+                          <button
+                            type="button"
+                            onClick={() => removeTag(tag)}
+                            className="ml-1 hover:bg-destructive hover:text-destructive-foreground rounded-full p-0.5"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Tag Input */}
+                  <div className="relative">
+                    <Input
+                      placeholder="Add tags to filter..."
+                      className="w-full"
+                      value={tagInputValue}
+                      onChange={(e) => setTagInputValue(e.target.value)}
+                      onKeyPress={handleTagKeyPress}
+                    />
+                  </div>
+
+                  {/* Tag Suggestions */}
+                  {filteredTags.length > 0 && (
+                    <div className="max-h-40 overflow-auto">
+                      {filteredTags.slice(0, 6).map((tag) => (
+                        <button
+                          key={tag}
+                          type="button"
+                          onClick={() => addTag(tag)}
+                          className="w-full text-left px-2 py-1 text-sm hover:bg-muted rounded-md flex items-center justify-between group"
+                        >
+                          <span>{tag}</span>
+                          <span className="text-xs text-muted-foreground group-hover:text-foreground">
+                            + Add
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          {/* Search Button */}
+          <Button
+            onClick={() => handleSearch()}
+            size="sm"
+            className="h-9"
+            disabled={isLoading || (!query.trim() && selectedTags.length === 0)}
+          >
+            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Search'}
+          </Button>
+        </div>
       </div>
 
-      {/* Tag Selection */}
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground">Filter by Tags</label>
-
-        {/* Selected Tags */}
-        {selectedTags.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {selectedTags.map((tag) => (
-              <Badge key={tag} variant="secondary" className="flex items-center gap-1">
-                {tag}
-                <button
-                  type="button"
-                  onClick={() => removeTag(tag)}
-                  className="ml-1 hover:bg-destructive hover:text-destructive-foreground rounded-full p-0.5"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </Badge>
-            ))}
-          </div>
-        )}
-
-        {/* Tag Input with Autocomplete */}
+      {/* Mobile Layout */}
+      <div className="block md:hidden space-y-3">
+        {/* Search Input */}
         <div className="relative">
-          <TagsIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground z-10" />
-          <Input
-            placeholder="Add tags to filter..."
-            className="w-full bg-background/50 pl-9"
-            value={tagInputValue}
-            onChange={(e) => setTagInputValue(e.target.value)}
-            onKeyPress={handleTagKeyPress}
-            onFocus={() => setTagPopoverOpen(true)}
-          />
+          <form onSubmit={handleSearch}>
+            <div className="relative">
+              <label htmlFor="search-query-mobile" className="sr-only">
+                Search your knowledge vault
+              </label>
+              <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="search-query-mobile"
+                name="search-query-mobile"
+                type="search"
+                placeholder="Search your knowledge vault..."
+                className="w-full bg-background/50 pl-9 pr-9"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onFocus={() => setShowSuggestions(query.length > 2)}
+              />
+              {isLoading ? (
+                <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+              ) : (
+                showClearButton && (
+                  <button
+                    type="button"
+                    onClick={handleClear}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-0.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+                    aria-label="Clear search"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )
+              )}
+            </div>
+          </form>
 
-          {/* Tag Autocomplete Dropdown */}
-          {(tagInputValue || tagPopoverOpen) && filteredTags.length > 0 && (
-            <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-auto">
-              <div className="p-1">
-                {filteredTags.slice(0, 8).map((tag) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    onClick={() => addTag(tag)}
-                    className="w-full text-left px-3 py-2 text-sm hover:bg-muted rounded-md flex items-center justify-between group"
-                  >
-                    <span>{tag}</span>
-                    <span className="text-xs text-muted-foreground group-hover:text-foreground">
-                      + Add
-                    </span>
-                  </button>
-                ))}
-                {tagInputValue.trim() && !filteredTags.includes(tagInputValue.trim()) && (
-                  <button
-                    type="button"
-                    onClick={() => addTag(tagInputValue.trim())}
-                    className="w-full text-left px-3 py-2 text-sm hover:bg-muted rounded-md flex items-center justify-between group border-t"
-                  >
-                    <span>Create "{tagInputValue.trim()}"</span>
-                    <span className="text-xs text-primary group-hover:text-primary">+ New</span>
-                  </button>
-                )}
+          {/* Search Suggestions Dropdown */}
+          {showSuggestions && (
+            <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border rounded-md shadow-lg">
+              <div className="p-2 text-sm text-muted-foreground">
+                Start typing to search your knowledge...
               </div>
             </div>
           )}
         </div>
-      </div>
 
-      {/* Search Button */}
-      <Button
-        onClick={() => handleSearch()}
-        className="w-full"
-        disabled={isLoading || (!query.trim() && selectedTags.length === 0)}
-      >
-        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        Search
-      </Button>
+        {/* Tag Selection */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-foreground">Filter by Tags</label>
+
+          {/* Selected Tags */}
+          {selectedTags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {selectedTags.map((tag) => (
+                <Badge key={tag} variant="secondary" className="flex items-center gap-1">
+                  {tag}
+                  <button
+                    type="button"
+                    onClick={() => removeTag(tag)}
+                    className="ml-1 hover:bg-destructive hover:text-destructive-foreground rounded-full p-0.5"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+          )}
+
+          {/* Tag Input with Autocomplete */}
+          <div className="relative">
+            <TagsIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground z-10" />
+            <Input
+              placeholder="Add tags to filter..."
+              className="w-full bg-background/50 pl-9"
+              value={tagInputValue}
+              onChange={(e) => setTagInputValue(e.target.value)}
+              onKeyPress={handleTagKeyPress}
+              onFocus={() => setTagPopoverOpen(true)}
+            />
+
+            {/* Tag Autocomplete Dropdown */}
+            {(tagInputValue || tagPopoverOpen) && filteredTags.length > 0 && (
+              <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-auto">
+                <div className="p-1">
+                  {filteredTags.slice(0, 8).map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => addTag(tag)}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-muted rounded-md flex items-center justify-between group"
+                    >
+                      <span>{tag}</span>
+                      <span className="text-xs text-muted-foreground group-hover:text-foreground">
+                        + Add
+                      </span>
+                    </button>
+                  ))}
+                  {tagInputValue.trim() && !filteredTags.includes(tagInputValue.trim()) && (
+                    <button
+                      type="button"
+                      onClick={() => addTag(tagInputValue.trim())}
+                      className="w-full text-left px-3 py-2 text-sm hover:bg-muted rounded-md flex items-center justify-between group border-t"
+                    >
+                      <span>Create "{tagInputValue.trim()}"</span>
+                      <span className="text-xs text-primary group-hover:text-primary">+ New</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Search Button */}
+        <Button
+          onClick={() => handleSearch()}
+          className="w-full"
+          disabled={isLoading || (!query.trim() && selectedTags.length === 0)}
+        >
+          {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Search
+        </Button>
+      </div>
     </div>
   );
 }
