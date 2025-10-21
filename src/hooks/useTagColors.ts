@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { DEFAULT_TAGS } from '@/lib/types';
 
 interface TagColors {
   backgroundColor: string;
@@ -67,7 +68,7 @@ export function useTagColors() {
       return `${colors.borderColor} ${colors.backgroundColor} ${colors.textColor} hover:opacity-80`;
     }
 
-    // Default colors for known tags
+    // Default colors for default tags
     switch (tagName) {
       case 'Important':
         return 'border-red-500/40 bg-red-900/50 text-red-300 hover:bg-red-900/80';
@@ -79,8 +80,28 @@ export function useTagColors() {
         return 'border-purple-500/40 bg-purple-900/50 text-purple-300 hover:bg-purple-900/80';
       case 'Investing':
         return 'border-green-500/40 bg-green-900/50 text-green-300 hover:bg-green-900/80';
+      case 'Finance':
+        return 'border-orange-500/40 bg-orange-900/50 text-orange-300 hover:bg-orange-900/80';
       default:
-        return 'border-accent/30 bg-accent/20 text-accent-foreground hover:bg-accent/30';
+        // Generate a consistent color for custom tags based on tag name
+        const colors = [
+          'border-pink-500/40 bg-pink-900/50 text-pink-300 hover:bg-pink-900/80',
+          'border-teal-500/40 bg-teal-900/50 text-teal-300 hover:bg-teal-900/80',
+          'border-indigo-500/40 bg-indigo-900/50 text-indigo-300 hover:bg-indigo-900/80',
+          'border-cyan-500/40 bg-cyan-900/50 text-cyan-300 hover:bg-cyan-900/80',
+          'border-amber-500/40 bg-amber-900/50 text-amber-300 hover:bg-amber-900/80',
+          'border-lime-500/40 bg-lime-900/50 text-lime-300 hover:bg-lime-900/80',
+          'border-emerald-500/40 bg-emerald-900/50 text-emerald-300 hover:bg-emerald-900/80',
+          'border-violet-500/40 bg-violet-900/50 text-violet-300 hover:bg-violet-900/80',
+        ];
+
+        // Use a simple hash function to select a consistent color for custom tags
+        let hash = 0;
+        for (let i = 0; i < tagName.length; i++) {
+          hash = tagName.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const colorIndex = Math.abs(hash) % colors.length;
+        return colors[colorIndex];
     }
   };
 
@@ -97,9 +118,15 @@ export function useTagColors() {
       if (colors.borderColor.includes('pink')) return 'border-l-pink-500/60 border-l-4';
       if (colors.borderColor.includes('orange')) return 'border-l-orange-500/60 border-l-4';
       if (colors.borderColor.includes('teal')) return 'border-l-teal-500/60 border-l-4';
+      if (colors.borderColor.includes('indigo')) return 'border-l-indigo-500/60 border-l-4';
+      if (colors.borderColor.includes('cyan')) return 'border-l-cyan-500/60 border-l-4';
+      if (colors.borderColor.includes('amber')) return 'border-l-amber-500/60 border-l-4';
+      if (colors.borderColor.includes('lime')) return 'border-l-lime-500/60 border-l-4';
+      if (colors.borderColor.includes('emerald')) return 'border-l-emerald-500/60 border-l-4';
+      if (colors.borderColor.includes('violet')) return 'border-l-violet-500/60 border-l-4';
     }
 
-    // Default colors for known tags
+    // Default colors for default tags
     switch (tagName) {
       case 'Important':
         return 'border-l-red-500/60 border-l-4';
@@ -111,8 +138,28 @@ export function useTagColors() {
         return 'border-l-purple-500/60 border-l-4';
       case 'Investing':
         return 'border-l-green-500/60 border-l-4';
+      case 'Finance':
+        return 'border-l-orange-500/60 border-l-4';
       default:
-        return '';
+        // Return border color for custom tags based on their hash color
+        const colors = [
+          'border-l-pink-500/60 border-l-4',
+          'border-l-teal-500/60 border-l-4',
+          'border-l-indigo-500/60 border-l-4',
+          'border-l-cyan-500/60 border-l-4',
+          'border-l-amber-500/60 border-l-4',
+          'border-l-lime-500/60 border-l-4',
+          'border-l-emerald-500/60 border-l-4',
+          'border-l-violet-500/60 border-l-4',
+        ];
+
+        // Use the same hash function as getTagClasses for consistency
+        let hash = 0;
+        for (let i = 0; i < tagName.length; i++) {
+          hash = tagName.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const colorIndex = Math.abs(hash) % colors.length;
+        return colors[colorIndex];
     }
   };
 

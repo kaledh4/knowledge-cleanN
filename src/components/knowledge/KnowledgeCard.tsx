@@ -62,16 +62,42 @@ export default function KnowledgeCard({ entry, onUpdate, onDelete }: KnowledgeCa
       if (colors.borderColor.includes('pink')) return '#ec4899';
       if (colors.borderColor.includes('orange')) return '#f97316';
       if (colors.borderColor.includes('teal')) return '#14b8a6';
+      if (colors.borderColor.includes('indigo')) return '#6366f1';
+      if (colors.borderColor.includes('cyan')) return '#06b6d4';
+      if (colors.borderColor.includes('amber')) return '#f59e0b';
+      if (colors.borderColor.includes('lime')) return '#84cc16';
+      if (colors.borderColor.includes('emerald')) return '#10b981';
+      if (colors.borderColor.includes('violet')) return '#8b5cf6';
     }
 
-    // Default colors for known tags
+    // Default colors for default tags
     switch (tag) {
       case 'Important': return '#ef4444';
       case 'To Do Research On': return '#eab308';
       case 'Learning': return '#3b82f6';
       case 'AI': return '#a855f7';
       case 'Investing': return '#22c55e';
-      default: return '#64748b';
+      case 'Finance': return '#f97316';
+      default:
+        // Return consistent color for custom tags based on hash
+        const colors = [
+          '#ec4899', // pink
+          '#14b8a6', // teal
+          '#6366f1', // indigo
+          '#06b6d4', // cyan
+          '#f59e0b', // amber
+          '#84cc16', // lime
+          '#10b981', // emerald
+          '#8b5cf6', // violet
+        ];
+
+        // Use the same hash function as useTagColors for consistency
+        let hash = 0;
+        for (let i = 0; i < tag.length; i++) {
+          hash = tag.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const colorIndex = Math.abs(hash) % colors.length;
+        return colors[colorIndex];
     }
   };
 
