@@ -58,23 +58,31 @@ export default function KnowledgeCard({ entry, onUpdate, onDelete }: KnowledgeCa
 
   // Get the primary tag color for the vertical strap
   const getPrimaryTagColor = (tag: string): string => {
-    if (tagColors[tag]) {
+    // Ensure tag is a valid string
+    if (!tag || typeof tag !== 'string') {
+      return '#64748b';
+    }
+
+    if (tagColors && tagColors[tag]) {
       const colors = tagColors[tag];
-      // Extract the base color from the borderColor
-      if (colors.borderColor.includes('red')) return '#ef4444';
-      if (colors.borderColor.includes('blue')) return '#3b82f6';
-      if (colors.borderColor.includes('green')) return '#22c55e';
-      if (colors.borderColor.includes('yellow')) return '#eab308';
-      if (colors.borderColor.includes('purple')) return '#a855f7';
-      if (colors.borderColor.includes('pink')) return '#ec4899';
-      if (colors.borderColor.includes('orange')) return '#f97316';
-      if (colors.borderColor.includes('teal')) return '#14b8a6';
-      if (colors.borderColor.includes('indigo')) return '#6366f1';
-      if (colors.borderColor.includes('cyan')) return '#06b6d4';
-      if (colors.borderColor.includes('amber')) return '#f59e0b';
-      if (colors.borderColor.includes('lime')) return '#84cc16';
-      if (colors.borderColor.includes('emerald')) return '#10b981';
-      if (colors.borderColor.includes('violet')) return '#8b5cf6';
+      // Ensure colors exists and has borderColor property
+      if (colors && colors.borderColor && typeof colors.borderColor === 'string') {
+        // Extract the base color from the borderColor
+        if (colors.borderColor.includes('red')) return '#ef4444';
+        if (colors.borderColor.includes('blue')) return '#3b82f6';
+        if (colors.borderColor.includes('green')) return '#22c55e';
+        if (colors.borderColor.includes('yellow')) return '#eab308';
+        if (colors.borderColor.includes('purple')) return '#a855f7';
+        if (colors.borderColor.includes('pink')) return '#ec4899';
+        if (colors.borderColor.includes('orange')) return '#f97316';
+        if (colors.borderColor.includes('teal')) return '#14b8a6';
+        if (colors.borderColor.includes('indigo')) return '#6366f1';
+        if (colors.borderColor.includes('cyan')) return '#06b6d4';
+        if (colors.borderColor.includes('amber')) return '#f59e0b';
+        if (colors.borderColor.includes('lime')) return '#84cc16';
+        if (colors.borderColor.includes('emerald')) return '#10b981';
+        if (colors.borderColor.includes('violet')) return '#8b5cf6';
+      }
     }
 
     // Default colors for default tags
@@ -108,7 +116,9 @@ export default function KnowledgeCard({ entry, onUpdate, onDelete }: KnowledgeCa
     }
   };
 
-  const primaryTagColor = entry.tags[0] ? getPrimaryTagColor(entry.tags[0]) : '#64748b';
+  const primaryTagColor = (entry.tags && entry.tags.length > 0 && entry.tags[0])
+    ? getPrimaryTagColor(entry.tags[0])
+    : '#64748b';
 
   const Icon = entry.type === 'TEXT' ? FileText : LinkIcon;
   
@@ -160,7 +170,7 @@ export default function KnowledgeCard({ entry, onUpdate, onDelete }: KnowledgeCa
       <Card
         className={cn(
           "flex h-full transform-gpu flex-col bg-card/70 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-primary/20 hover:shadow-lg cursor-pointer relative overflow-hidden card-vertical-strap",
-          getCardBorderColor(entry.tags[0] as Tag)
+          getCardBorderColor((entry.tags && entry.tags.length > 0) ? entry.tags[0] as Tag : '')
         )}
         onClick={handleCardClick}
         style={{
@@ -230,7 +240,7 @@ export default function KnowledgeCard({ entry, onUpdate, onDelete }: KnowledgeCa
             "flex flex-wrap gap-2",
             textDirection === 'rtl' && "justify-end"
           )}>
-            {entry.tags.map(tag => (
+            {(entry.tags || []).map(tag => (
               <Badge key={tag} variant="outline" className={cn(getTagClasses(tag as Tag))}>
                 {tag}
               </Badge>

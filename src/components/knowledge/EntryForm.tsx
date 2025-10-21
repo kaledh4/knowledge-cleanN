@@ -21,10 +21,9 @@ import {
 } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import { Toggle } from '@/components/ui/toggle';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Spinner } from '../ui/spinner';
-import { X, Plus } from 'lucide-react';
+import { X } from 'lucide-react';
 
 const formSchema = z.object({
   source: z.string().min(10, {
@@ -43,11 +42,10 @@ type EntryFormProps = {
 
 export default function EntryForm({ entry, onSuccess, initialData }: EntryFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [newTagInput, setNewTagInput] = useState('');
-  const [allTags, setAllTags] = useState<string[]>(DEFAULT_TAGS as string[]);
+  const [availableTags, setAvailableTags] = useState<string[]>(DEFAULT_TAGS as string[]);
   const { toast } = useToast();
 
-  // Load existing tags from the API
+  // Load existing tags from the API (read-only)
   useEffect(() => {
     const loadTags = async () => {
       try {
@@ -56,7 +54,7 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
           const data = await response.json();
           const existingTags = data.tags.map((tag: { name: string }) => tag.name);
           const uniqueTags = Array.from(new Set([...DEFAULT_TAGS as string[], ...existingTags]));
-          setAllTags(uniqueTags);
+          setAvailableTags(uniqueTags);
         }
       } catch (error) {
         console.error('Failed to load tags:', error);
@@ -139,28 +137,9 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
     return 'Paste your text, a YouTube link, or an X.com post URL here...';
   };
 
-  const addCustomTag = () => {
-    const trimmedTag = newTagInput.trim();
-    if (trimmedTag && !trimmedTag.includes(',') && !allTags.includes(trimmedTag)) {
-      const currentTags = form.getValues('tags') || [];
-      if (!currentTags.includes(trimmedTag)) {
-        form.setValue('tags', [...currentTags, trimmedTag]);
-        setAllTags(prev => [...prev, trimmedTag]);
-        setNewTagInput('');
-      }
-    }
-  };
-
   const removeTag = (tagToRemove: string) => {
     const currentTags = form.getValues('tags') || [];
     form.setValue('tags', currentTags.filter(tag => tag !== tagToRemove));
-  };
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && newTagInput.trim()) {
-      e.preventDefault();
-      addCustomTag();
-    }
   };
 
   const isReadOnly = () => {
@@ -197,7 +176,11 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
             <FormItem>
               <FormLabel>Tags</FormLabel>
               <FormDescription>
-                Categorize this entry to find it easily later. Select from default tags or create custom ones.
+                Categorize this entry to find it easily later. Select from existing tags.
+                <br />
+                <span className="text-xs">
+                  To create new tags, visit the <a href="/customize-tags" className="text-primary hover:underline">Customize Tags</a> page.
+                </span>
               </FormDescription>
               <FormControl>
                 <div className="space-y-4">
@@ -219,87 +202,34 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
                     </div>
                   )}
 
-                  {/* Default Tags */}
+                  {/* Available Tags */}
                   <div>
-                    <label className="text-sm font-medium mb-2 block">Default Tags</label>
-                    <div className="flex flex-wrap gap-2">
-                      {DEFAULT_TAGS.map((tag) => (
-                        <Toggle
-                          key={tag}
-                          variant="outline"
-                          pressed={field.value?.includes(tag)}
-                          onPressedChange={(pressed) => {
-                            const currentTags = field.value || [];
-                            const newTags = pressed
-                              ? [...currentTags, tag]
-                              : currentTags.filter((t) => t !== tag);
-                            field.onChange(newTags);
-                          }}
-                        >
-                          {tag}
-                        </Toggle>
-                      ))}
+                    <label className="text-sm font-medium mb-2 block">Available Tags</label>
+                    <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-2 border rounded-md bg-muted/20">
+                      {availableTags.length > 0 ? (
+                        availableTags.map((tag) => (
+                          <Toggle
+                            key={tag}
+                            variant="outline"
+                            size="sm"
+                            pressed={field.value?.includes(tag)}
+                            onPressedChange={(pressed) => {
+                              const currentTags = field.value || [];
+                              const newTags = pressed
+                                ? [...currentTags, tag]
+                                : currentTags.filter((t) => t !== tag);
+                              field.onChange(newTags);
+                            }}
+                            disabled={isReadOnly()}
+                          >
+                            {tag}
+                          </Toggle>
+                        ))
+                      ) : (
+                        <p className="text-sm text-muted-foreground">No tags available. Create tags in the Customize Tags page.</p>
+                      )}
                     </div>
                   </div>
-
-                  {/* Custom Tag Creation */}
-                  <div>
-                    <label className="text-sm font-medium mb-2 block">Create Custom Tag</label>
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <Input
-                        type="text"
-                        placeholder="Enter new tag name..."
-                        value={newTagInput}
-                        onChange={(e) => setNewTagInput(e.target.value)}
-                        onKeyPress={handleKeyPress}
-                        className="flex-1"
-                        disabled={isReadOnly()}
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={addCustomTag}
-                        disabled={!newTagInput.trim() || isReadOnly()}
-                        className="flex items-center gap-1 sm:w-auto"
-                      >
-                        <Plus className="h-4 w-4" />
-                        <span className="hidden sm:inline">Add Tag</span>
-                        <span className="sm:hidden">Add</span>
-                      </Button>
-                    </div>
-                    {newTagInput.trim() && allTags.includes(newTagInput.trim()) && (
-                      <p className="text-xs text-muted-foreground mt-1">
-                        This tag already exists or is selected.
-                      </p>
-                    )}
-                  </div>
-
-                  {/* All Available Tags (excluding default and selected) */}
-                  {allTags.filter(tag => !DEFAULT_TAGS.includes(tag as typeof DEFAULT_TAGS[number]) && !field.value?.includes(tag)).length > 0 && (
-                    <div>
-                      <label className="text-sm font-medium mb-2 block">Existing Custom Tags</label>
-                      <div className="flex flex-wrap gap-2">
-                        {allTags
-                          .filter(tag => !DEFAULT_TAGS.includes(tag as typeof DEFAULT_TAGS[number]) && !field.value?.includes(tag))
-                          .map((tag) => (
-                            <Toggle
-                              key={tag}
-                              variant="outline"
-                              pressed={field.value?.includes(tag)}
-                              onPressedChange={(pressed) => {
-                                const currentTags = field.value || [];
-                                const newTags = pressed
-                                  ? [...currentTags, tag]
-                                  : currentTags.filter((t) => t !== tag);
-                                field.onChange(newTags);
-                              }}
-                            >
-                              {tag}
-                            </Toggle>
-                          ))}
-                      </div>
-                    </div>
-                  )}
                 </div>
               </FormControl>
               <FormMessage />

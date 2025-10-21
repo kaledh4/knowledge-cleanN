@@ -65,10 +65,18 @@ export function useTagColors() {
   }, []);
 
   const getTagClasses = (tagName: string): string => {
+    // Ensure tagName is a valid string
+    if (!tagName || typeof tagName !== 'string') {
+      return 'border-accent/30 bg-accent/20 text-accent-foreground hover:bg-accent/30';
+    }
+
     // Check if user has custom colors for this tag
-    if (tagColors[tagName]) {
+    if (tagColors && tagColors[tagName]) {
       const colors = tagColors[tagName];
-      return `${colors.borderColor} ${colors.backgroundColor} ${colors.textColor} hover:opacity-80`;
+      // Ensure colors exists and has required properties
+      if (colors && colors.borderColor && colors.backgroundColor && colors.textColor) {
+        return `${colors.borderColor} ${colors.backgroundColor} ${colors.textColor} hover:opacity-80`;
+      }
     }
 
     // Default colors for default tags
@@ -109,24 +117,32 @@ export function useTagColors() {
   };
 
   const getCardBorderColor = (tagName: string): string => {
+    // Ensure tagName is a valid string
+    if (!tagName || typeof tagName !== 'string') {
+      return '';
+    }
+
     // Check if user has custom colors for this tag
-    if (tagColors[tagName]) {
+    if (tagColors && tagColors[tagName]) {
       const colors = tagColors[tagName];
-      // Extract the base color from the borderColor
-      if (colors.borderColor.includes('red')) return 'border-l-red-500/60 border-l-4';
-      if (colors.borderColor.includes('blue')) return 'border-l-blue-500/60 border-l-4';
-      if (colors.borderColor.includes('green')) return 'border-l-green-500/60 border-l-4';
-      if (colors.borderColor.includes('yellow')) return 'border-l-yellow-500/60 border-l-4';
-      if (colors.borderColor.includes('purple')) return 'border-l-purple-500/60 border-l-4';
-      if (colors.borderColor.includes('pink')) return 'border-l-pink-500/60 border-l-4';
-      if (colors.borderColor.includes('orange')) return 'border-l-orange-500/60 border-l-4';
-      if (colors.borderColor.includes('teal')) return 'border-l-teal-500/60 border-l-4';
-      if (colors.borderColor.includes('indigo')) return 'border-l-indigo-500/60 border-l-4';
-      if (colors.borderColor.includes('cyan')) return 'border-l-cyan-500/60 border-l-4';
-      if (colors.borderColor.includes('amber')) return 'border-l-amber-500/60 border-l-4';
-      if (colors.borderColor.includes('lime')) return 'border-l-lime-500/60 border-l-4';
-      if (colors.borderColor.includes('emerald')) return 'border-l-emerald-500/60 border-l-4';
-      if (colors.borderColor.includes('violet')) return 'border-l-violet-500/60 border-l-4';
+      // Ensure colors exists and has borderColor property
+      if (colors && colors.borderColor && typeof colors.borderColor === 'string') {
+        // Extract the base color from the borderColor
+        if (colors.borderColor.includes('red')) return 'border-l-red-500/60 border-l-4';
+        if (colors.borderColor.includes('blue')) return 'border-l-blue-500/60 border-l-4';
+        if (colors.borderColor.includes('green')) return 'border-l-green-500/60 border-l-4';
+        if (colors.borderColor.includes('yellow')) return 'border-l-yellow-500/60 border-l-4';
+        if (colors.borderColor.includes('purple')) return 'border-l-purple-500/60 border-l-4';
+        if (colors.borderColor.includes('pink')) return 'border-l-pink-500/60 border-l-4';
+        if (colors.borderColor.includes('orange')) return 'border-l-orange-500/60 border-l-4';
+        if (colors.borderColor.includes('teal')) return 'border-l-teal-500/60 border-l-4';
+        if (colors.borderColor.includes('indigo')) return 'border-l-indigo-500/60 border-l-4';
+        if (colors.borderColor.includes('cyan')) return 'border-l-cyan-500/60 border-l-4';
+        if (colors.borderColor.includes('amber')) return 'border-l-amber-500/60 border-l-4';
+        if (colors.borderColor.includes('lime')) return 'border-l-lime-500/60 border-l-4';
+        if (colors.borderColor.includes('emerald')) return 'border-l-emerald-500/60 border-l-4';
+        if (colors.borderColor.includes('violet')) return 'border-l-violet-500/60 border-l-4';
+      }
     }
 
     // Default colors for default tags

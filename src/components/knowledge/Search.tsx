@@ -124,7 +124,8 @@ export default function Search({ onSearch }: SearchProps) {
   };
 
   const addTag = (tag: string) => {
-    if (!selectedTags.includes(tag)) {
+    // Only add tag if it exists in available tags
+    if (!selectedTags.includes(tag) && allTags.includes(tag)) {
       setSelectedTags([...selectedTags, tag]);
       setTagInputValue('');
       setTagPopoverOpen(false);
@@ -138,7 +139,13 @@ export default function Search({ onSearch }: SearchProps) {
   const handleTagKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && tagInputValue.trim()) {
       e.preventDefault();
-      addTag(tagInputValue.trim());
+      // Only add if it's an existing tag
+      const matchingTag = allTags.find(tag =>
+        tag.toLowerCase() === tagInputValue.trim().toLowerCase()
+      );
+      if (matchingTag) {
+        addTag(matchingTag);
+      }
     }
   };
 
@@ -231,7 +238,7 @@ export default function Search({ onSearch }: SearchProps) {
                   {/* Tag Input */}
                   <div className="relative">
                     <Input
-                      placeholder="Add tags to filter..."
+                      placeholder="Type to search tags..."
                       className="w-full"
                       value={tagInputValue}
                       onChange={(e) => setTagInputValue(e.target.value)}
@@ -347,7 +354,7 @@ export default function Search({ onSearch }: SearchProps) {
           <div className="relative">
             <TagsIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground z-10" />
             <Input
-              placeholder="Add tags to filter..."
+              placeholder="Type to search existing tags..."
               className="w-full bg-background/50 pl-9"
               value={tagInputValue}
               onChange={(e) => setTagInputValue(e.target.value)}
@@ -372,16 +379,6 @@ export default function Search({ onSearch }: SearchProps) {
                       </span>
                     </button>
                   ))}
-                  {tagInputValue.trim() && !filteredTags.includes(tagInputValue.trim()) && (
-                    <button
-                      type="button"
-                      onClick={() => addTag(tagInputValue.trim())}
-                      className="w-full text-left px-3 py-2 text-sm hover:bg-muted rounded-md flex items-center justify-between group border-t"
-                    >
-                      <span>Create "{tagInputValue.trim()}"</span>
-                      <span className="text-xs text-primary group-hover:text-primary">+ New</span>
-                    </button>
-                  )}
                 </div>
               </div>
             )}
