@@ -14,6 +14,7 @@ import type { KnowledgeEntry, Tag } from '@/lib/types';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { useTagColors } from '@/hooks/useTagColors';
 
 type ViewEntryDialogProps = {
   isOpen: boolean;
@@ -40,16 +41,33 @@ const getTagClasses = (tag: Tag): string => {
 
 export default function ViewEntryDialog({ isOpen, setIsOpen, entry }: ViewEntryDialogProps) {
   const Icon = entry.type === 'TEXT' ? FileText : LinkIcon;
-  
-  // Safely format the date with validation
+  const { getTagClasses } = useTagColors();
+
+  // Function to detect if text is Arabic
+  const isArabic = (text: string): boolean => {
+    const arabicRegex = /[\u0600-\u06FF]/;
+    return arabicRegex.test(text);
+  };
+
+  // Determine text direction based on content
+  const textDirection = isArabic(entry.title) || isArabic(entry.content) ? 'rtl' : 'ltr';
+
+  // Safely format the date with validation and proper timezone handling
   const getTimeAgo = () => {
     try {
-      const date = new Date(entry.created_at);
-      if (isNaN(date.getTime())) {
+      // Parse the ISO string and create a proper UTC date
+      const utcDate = new Date(entry.created_at);
+      if (isNaN(utcDate.getTime())) {
         return 'Unknown time';
       }
-      return formatDistanceToNow(date, { addSuffix: true });
+
+      // Use the parsed date directly - formatDistanceToNow handles timezone conversion properly
+      return formatDistanceToNow(utcDate, {
+        addSuffix: true,
+        includeSeconds: false
+      });
     } catch (error) {
+      console.error('Date formatting error:', error);
       return 'Unknown time';
     }
   };
@@ -77,21 +95,33 @@ export default function ViewEntryDialog({ isOpen, setIsOpen, entry }: ViewEntryD
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-[800px] max-h-[80vh] flex flex-col">
+      <DialogContent className="sm:max-w-[800px] max-h-[80vh] flex flex-col" dir={textDirection}>
         <DialogHeader className="flex-shrink-0">
-          <DialogTitle className="font-headline text-2xl text-primary flex items-center gap-2">
+          <DialogTitle className={cn(
+            "font-headline text-2xl text-primary flex items-center gap-2",
+            textDirection === 'rtl' && "flex-row-reverse text-right"
+          )}>
             <Icon className="h-6 w-6" />
             {entry.title}
           </DialogTitle>
-          <DialogDescription className="flex items-center gap-2 text-sm text-muted-foreground">
+          <DialogDescription className={cn(
+            "flex items-center gap-2 text-sm text-muted-foreground",
+            textDirection === 'rtl' && "flex-row-reverse"
+          )}>
             <span>Added {timeAgo}</span>
           </DialogDescription>
         </DialogHeader>
         
-        <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+        <div className={cn(
+          "flex-1 overflow-y-auto space-y-4",
+          textDirection === 'rtl' ? "pl-2 pr-2" : "pr-2 pl-2"
+        )}>
           {/* Content */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
+            <div className={cn(
+              "flex items-center justify-between",
+              textDirection === 'rtl' && "flex-row-reverse"
+            )}>
               <h4 className="text-sm font-medium text-foreground">Content</h4>
               <Button
                 variant="outline"
@@ -104,7 +134,10 @@ export default function ViewEntryDialog({ isOpen, setIsOpen, entry }: ViewEntryD
               </Button>
             </div>
             <div className="rounded-md border bg-muted/30 p-4 max-h-96 overflow-y-auto">
-              <p className="text-sm text-foreground whitespace-pre-wrap select-text leading-relaxed">
+              <p className={cn(
+                "text-sm text-foreground whitespace-pre-wrap select-text leading-relaxed",
+                textDirection === 'rtl' && "text-right"
+              )}>
                 {entry.content}
               </p>
             </div>
@@ -135,7 +168,10 @@ export default function ViewEntryDialog({ isOpen, setIsOpen, entry }: ViewEntryD
           {entry.tags.length > 0 && (
             <div className="space-y-2">
               <h4 className="text-sm font-medium text-foreground">Tags</h4>
-              <div className="flex flex-wrap gap-2">
+              <div className={cn(
+                "flex flex-wrap gap-2",
+                textDirection === 'rtl' && "justify-end"
+              )}>
                 {entry.tags.map(tag => (
                   <Badge key={tag} variant="outline" className={cn(getTagClasses(tag as Tag))}>
                     {tag}

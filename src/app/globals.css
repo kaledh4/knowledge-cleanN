@@ -83,3 +83,28 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Vertical color strap for knowledge cards */
+@layer components {
+  .card-vertical-strap {
+    position: relative;
+  }
+
+  .card-vertical-strap::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 100%;
+    background-color: var(--tag-color, #64748b);
+    border-radius: 0.5rem 0 0 0.5rem;
+  }
+
+  /* RTL support - move strap to right for RTL content */
+  .card-vertical-strap[dir="rtl"]::before {
+    left: auto;
+    right: 0;
+    border-radius: 0 0.5rem 0.5rem 0;
+  }
+}
