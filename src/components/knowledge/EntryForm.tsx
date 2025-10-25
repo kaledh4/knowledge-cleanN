@@ -7,7 +7,7 @@ import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { ApiClient } from '@/lib/api-client';
 import { extractFromSource } from '@/lib/client-extractor';
-import { DEFAULT_TAGS, type KnowledgeEntry, type Tag } from '@/lib/types';
+import { type KnowledgeEntry, type Tag } from '@/lib/types';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -42,7 +42,7 @@ type EntryFormProps = {
 
 export default function EntryForm({ entry, onSuccess, initialData }: EntryFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [availableTags, setAvailableTags] = useState<string[]>(DEFAULT_TAGS as string[]);
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
   const { toast } = useToast();
 
   // Load existing tags from the API (read-only)
@@ -53,8 +53,7 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
         if (response.ok) {
           const data = await response.json();
           const existingTags = data.tags.map((tag: { name: string }) => tag.name);
-          const uniqueTags = Array.from(new Set([...DEFAULT_TAGS as string[], ...existingTags]));
-          setAvailableTags(uniqueTags);
+          setAvailableTags(existingTags);
         }
       } catch (error) {
         console.error('Failed to load tags:', error);

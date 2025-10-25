@@ -216,16 +216,10 @@ export default function CustomizeTagsPage() {
     try {
       setCreatingTag(true);
 
-      // Create a new knowledge entry with just the tag (this will create the tag in the system)
-      const response = await fetch('/api/knowledge', {
+      const response = await fetch('/api/tags', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          source: `Tag created: ${newTagNameToCreate}`,
-          tags: [newTagNameToCreate.trim()],
-          title: `Tag: ${newTagNameToCreate}`,
-          enrichedContent: `This is a system entry created to initialize the tag "${newTagNameToCreate}". You can delete this entry if you don't need it.`
-        }),
+        body: JSON.stringify({ name: newTagNameToCreate.trim() })
       });
 
       if (response.ok) {

@@ -31,38 +31,20 @@ export async function GET(request: NextRequest) {
 
     const db = getDatabase();
 
-    // Get all unique tags from knowledge entries
+    // Get all unique tags from the tags table and their usage counts
     const stmt = db.prepare(`
-      SELECT DISTINCT tags
-      FROM knowledge_entries
-      WHERE user_id = ? AND tags IS NOT NULL AND tags != '[]'
+        SELECT
+            t.name,
+            (SELECT COUNT(*) FROM knowledge_entries ke WHERE ke.user_id = t.user_id AND ke.tags LIKE '%' || t.name || '%') as usageCount
+        FROM
+            tags t
+        WHERE
+            t.user_id = ?
+        ORDER BY
+            usageCount DESC
     `);
 
-    const rows = stmt.all(user.id) as any[];
-
-    // Extract and parse all tags
-    const allTags: string[] = [];
-    rows.forEach(row => {
-      try {
-        const tags = JSON.parse(row.tags || '[]');
-        if (Array.isArray(tags)) {
-          allTags.push(...tags);
-        }
-      } catch (error) {
-        console.warn('Failed to parse tags:', error);
-      }
-    });
-
-    // Get unique tags and count usage
-    const tagCounts = new Map<string, number>();
-    allTags.forEach(tag => {
-      tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
-    });
-
-    const result = Array.from(tagCounts.entries()).map(([tag, count]) => ({
-      name: tag,
-      usageCount: count
-    })).sort((a, b) => b.usageCount - a.usageCount);
+    const result = stmt.all(user.id);
 
     return NextResponse.json({
       tags: result,
@@ -76,6 +58,48 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+// Add a new tag
+export async function POST(request: NextRequest) {
+    try {
+      const user = await getAuthenticatedUser();
+      if (!user) {
+        return NextResponse.json(
+          { error: 'Authentication required' },
+          { status: 401 }
+        );
+      }
+
+      const { name } = await request.json();
+
+      if (!name) {
+        return NextResponse.json(
+          { error: 'Tag name is required' },
+          { status: 400 }
+        );
+      }
+
+      const db = getDatabase();
+
+      const stmt = db.prepare(`
+        INSERT INTO tags (user_id, name, is_custom)
+        VALUES (?, ?, 1)
+      `);
+
+      stmt.run(user.id, name);
+
+      return NextResponse.json({
+        message: 'Tag created successfully',
+        success: true
+      });
+    } catch (error) {
+      console.error('Error creating tag:', error);
+      return NextResponse.json(
+        { error: 'Failed to create tag', success: false },
+        { status: 500 }
+      );
+    }
+  }
 
 // Update/replace a tag across all entries
 export async function PUT(request: NextRequest) {
@@ -106,56 +130,49 @@ export async function PUT(request: NextRequest) {
 
     const db = getDatabase();
 
-    // Get all entries that contain the old tag
-    const selectStmt = db.prepare(`
-      SELECT id, tags FROM knowledge_entries
-      WHERE user_id = ? AND tags LIKE ?
-    `);
+    db.transaction(() => {
+        // Update the tags table
+        const updateTagStmt = db.prepare(`
+          UPDATE tags
+          SET name = ?
+          WHERE user_id = ? AND name = ?
+        `);
+        updateTagStmt.run(newTag, user.id, oldTag);
 
-    const rows = selectStmt.all(user.id, `%"${oldTag}"%`) as any[];
+        // Get all entries that contain the old tag
+        const selectStmt = db.prepare(`
+          SELECT id, tags FROM knowledge_entries
+          WHERE user_id = ? AND tags LIKE ?
+        `);
 
-    let updatedCount = 0;
-    const errors: string[] = [];
+        const rows = selectStmt.all(user.id, `%"${oldTag}"%`) as any[];
 
-    // Update each entry's tags
-    rows.forEach(row => {
-      try {
-        const tags = JSON.parse(row.tags || '[]');
-        if (Array.isArray(tags)) {
-          const updatedTags = tags.map(tag => tag === oldTag ? newTag : tag);
-          const updatedTagsJson = JSON.stringify(updatedTags);
+        // Update each entry's tags
+        rows.forEach(row => {
+          try {
+            const tags = JSON.parse(row.tags || '[]');
+            if (Array.isArray(tags)) {
+              const updatedTags = tags.map(tag => tag === oldTag ? newTag : tag);
+              const updatedTagsJson = JSON.stringify(updatedTags);
 
-          const updateStmt = db.prepare(`
-            UPDATE knowledge_entries
-            SET tags = ?, updated_at = CURRENT_TIMESTAMP
-            WHERE id = ?
-          `);
+              const updateStmt = db.prepare(`
+                UPDATE knowledge_entries
+                SET tags = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+              `);
 
-          updateStmt.run(updatedTagsJson, row.id);
-          updatedCount++;
-        }
-      } catch (error) {
-        console.error(`Failed to update entry ${row.id}:`, error);
-        errors.push(`Entry ${row.id}: ${error.message}`);
-      }
-    });
+              updateStmt.run(updatedTagsJson, row.id);
+            }
+          } catch (error) {
+            console.error(`Failed to update entry ${row.id}:`, error);
+            throw error;
+          }
+        });
+    })();
 
-    if (errors.length > 0) {
-      console.error('Some tag updates failed:', errors);
-      return NextResponse.json(
-        {
-          error: 'Partial update completed with errors',
-          errors,
-          updatedCount,
-          success: false
-        },
-        { status: 207 } // Multi-Status
-      );
-    }
 
     return NextResponse.json({
-      message: `Successfully updated ${updatedCount} entries`,
-      updatedCount,
+      message: `Successfully updated tag`,
       oldTag,
       newTag,
       success: true
@@ -192,56 +209,48 @@ export async function DELETE(request: NextRequest) {
 
     const db = getDatabase();
 
-    // Get all entries that contain the tag
-    const selectStmt = db.prepare(`
-      SELECT id, tags FROM knowledge_entries
-      WHERE user_id = ? AND tags LIKE ?
-    `);
+    db.transaction(() => {
+        // Delete the tag from the tags table
+        const deleteTagStmt = db.prepare(`
+          DELETE FROM tags
+          WHERE user_id = ? AND name = ?
+        `);
+        deleteTagStmt.run(user.id, tag);
 
-    const rows = selectStmt.all(user.id, `%"${tag}"%`) as any[];
+        // Get all entries that contain the tag
+        const selectStmt = db.prepare(`
+          SELECT id, tags FROM knowledge_entries
+          WHERE user_id = ? AND tags LIKE ?
+        `);
 
-    let updatedCount = 0;
-    const errors: string[] = [];
+        const rows = selectStmt.all(user.id, `%"${tag}"%`) as any[];
 
-    // Remove the tag from each entry
-    rows.forEach(row => {
-      try {
-        const tags = JSON.parse(row.tags || '[]');
-        if (Array.isArray(tags)) {
-          const updatedTags = tags.filter(t => t !== tag);
-          const updatedTagsJson = JSON.stringify(updatedTags);
+        // Remove the tag from each entry
+        rows.forEach(row => {
+          try {
+            const tags = JSON.parse(row.tags || '[]');
+            if (Array.isArray(tags)) {
+              const updatedTags = tags.filter(t => t !== tag);
+              const updatedTagsJson = JSON.stringify(updatedTags);
 
-          const updateStmt = db.prepare(`
-            UPDATE knowledge_entries
-            SET tags = ?, updated_at = CURRENT_TIMESTAMP
-            WHERE id = ?
-          `);
+              const updateStmt = db.prepare(`
+                UPDATE knowledge_entries
+                SET tags = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+              `);
 
-          updateStmt.run(updatedTagsJson, row.id);
-          updatedCount++;
-        }
-      } catch (error) {
-        console.error(`Failed to update entry ${row.id}:`, error);
-        errors.push(`Entry ${row.id}: ${error.message}`);
-      }
-    });
+              updateStmt.run(updatedTagsJson, row.id);
+            }
+          } catch (error) {
+            console.error(`Failed to update entry ${row.id}:`, error);
+            throw error;
+          }
+        });
+    })();
 
-    if (errors.length > 0) {
-      console.error('Some tag deletions failed:', errors);
-      return NextResponse.json(
-        {
-          error: 'Partial deletion completed with errors',
-          errors,
-          updatedCount,
-          success: false
-        },
-        { status: 207 } // Multi-Status
-      );
-    }
 
     return NextResponse.json({
-      message: `Successfully removed tag from ${updatedCount} entries`,
-      updatedCount,
+      message: `Successfully deleted tag`,
       deletedTag: tag,
       success: true
     });
