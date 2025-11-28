@@ -182,11 +182,72 @@ export function useTagColors() {
     }
   };
 
+  const getTagHexColor = (tagName: string): string => {
+    // Ensure tagName is a valid string
+    if (!tagName || typeof tagName !== 'string') {
+      return '#64748b'; // slate-500
+    }
+
+    // Check if user has custom colors for this tag
+    if (tagColors && tagColors[tagName]) {
+      const colors = tagColors[tagName];
+      // Ensure colors exists and has borderColor property
+      if (colors && colors.borderColor && typeof colors.borderColor === 'string') {
+        // Extract the base color from the borderColor
+        if (colors.borderColor.includes('red')) return '#ef4444';
+        if (colors.borderColor.includes('blue')) return '#3b82f6';
+        if (colors.borderColor.includes('green')) return '#22c55e';
+        if (colors.borderColor.includes('yellow')) return '#eab308';
+        if (colors.borderColor.includes('purple')) return '#a855f7';
+        if (colors.borderColor.includes('pink')) return '#ec4899';
+        if (colors.borderColor.includes('orange')) return '#f97316';
+        if (colors.borderColor.includes('teal')) return '#14b8a6';
+        if (colors.borderColor.includes('indigo')) return '#6366f1';
+        if (colors.borderColor.includes('cyan')) return '#06b6d4';
+        if (colors.borderColor.includes('amber')) return '#f59e0b';
+        if (colors.borderColor.includes('lime')) return '#84cc16';
+        if (colors.borderColor.includes('emerald')) return '#10b981';
+        if (colors.borderColor.includes('violet')) return '#8b5cf6';
+      }
+    }
+
+    // Default colors for default tags
+    switch (tagName) {
+      case 'Important': return '#ef4444'; // red-500
+      case 'To Do Research On': return '#eab308'; // yellow-500
+      case 'Learning': return '#3b82f6'; // blue-500
+      case 'AI': return '#a855f7'; // purple-500
+      case 'Investing': return '#22c55e'; // green-500
+      case 'Finance': return '#f97316'; // orange-500
+      default:
+        // Return consistent color for custom tags based on hash
+        const colors = [
+          '#ec4899', // pink-500
+          '#14b8a6', // teal-500
+          '#6366f1', // indigo-500
+          '#06b6d4', // cyan-500
+          '#f59e0b', // amber-500
+          '#84cc16', // lime-500
+          '#10b981', // emerald-500
+          '#8b5cf6', // violet-500
+        ];
+
+        // Use the same hash function as getTagClasses for consistency
+        let hash = 0;
+        for (let i = 0; i < tagName.length; i++) {
+          hash = tagName.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const colorIndex = Math.abs(hash) % colors.length;
+        return colors[colorIndex];
+    }
+  };
+
   return {
     tagColors,
     loading,
     getTagClasses,
     getCardBorderColor,
+    getTagHexColor,
     refetch: () => fetchTagColors(false),
     forceRefresh: () => fetchTagColors(true)
   };

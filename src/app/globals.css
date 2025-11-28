@@ -107,4 +107,10 @@
     right: 0;
     border-radius: 0 0.5rem 0.5rem 0;
   }
+
+  .knowledge-card:hover,
+  .knowledge-card:focus {
+    border-left-color: var(--tag-color);
+    background-color: color-mix(in srgb, var(--tag-color) 10%, transparent);
+  }
 }
