@@ -17,8 +17,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        body: ['var(--font-jakarta)', 'var(--font-cairo)', 'Plus Jakarta Sans', 'Cairo', 'sans-serif'],
-        headline: ['var(--font-outfit)', 'Outfit', 'sans-serif'],
+        body: ['-apple-system', 'BlinkMacSystemFont', 'San Francisco', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'sans-serif'],
+        headline: ['-apple-system', 'BlinkMacSystemFont', 'San Francisco', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'sans-serif'],
         arabic: ['var(--font-cairo)', 'Cairo', 'sans-serif'],
         code: ['monospace'],
       },

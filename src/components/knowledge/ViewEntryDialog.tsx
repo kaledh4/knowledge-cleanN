@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -13,8 +13,10 @@ import { Button } from '@/components/ui/button';
 import { FileText, Link as LinkIcon, ExternalLink, Copy } from 'lucide-react';
 import type { KnowledgeEntry } from '@/lib/types';
 import { formatDistanceToNow } from 'date-fns';
-import { cn, getTagColor } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import { getTagColors, TagColor } from '@/lib/tagService';
+import { getTagColorClasses } from '@/lib/tag-utils';
 
 type ViewEntryDialogProps = {
   isOpen: boolean;
@@ -24,6 +26,21 @@ type ViewEntryDialogProps = {
 
 export default function ViewEntryDialog({ isOpen, setIsOpen, entry }: ViewEntryDialogProps) {
   const Icon = entry.type === 'TEXT' ? FileText : LinkIcon;
+  const [userTagColors, setUserTagColors] = useState<Record<string, TagColor>>({});
+
+  useEffect(() => {
+    if (isOpen) {
+      const loadColors = async () => {
+        try {
+          const colors = await getTagColors();
+          setUserTagColors(colors);
+        } catch (error) {
+          console.error('Failed to load tag colors:', error);
+        }
+      };
+      loadColors();
+    }
+  }, [isOpen]);
 
   // Function to detect if text is Arabic
   const isArabic = (text: string): boolean => {
@@ -71,8 +88,8 @@ export default function ViewEntryDialog({ isOpen, setIsOpen, entry }: ViewEntryD
       <DialogContent className="sm:max-w-[800px] max-h-[85vh] flex flex-col" dir={textDirection}>
         <DialogHeader className="flex-shrink-0 pb-4">
           <DialogTitle className={cn(
-            "font-headline text-2xl md:text-3xl font-bold tracking-tight text-primary flex items-center gap-3",
-            textDirection === 'rtl' && "flex-row-reverse text-right font-arabic"
+            "text-2xl md:text-3xl font-bold tracking-tight text-primary flex items-center gap-3",
+            textDirection === 'rtl' ? "flex-row-reverse text-right font-arabic" : "font-headline"
           )}>
             <Icon className="h-7 w-7" />
             {entry.title || 'Untitled'}
@@ -109,7 +126,7 @@ export default function ViewEntryDialog({ isOpen, setIsOpen, entry }: ViewEntryD
             <div className="rounded-lg border border-white/10 bg-card/40 backdrop-blur-sm p-5 max-h-96 overflow-y-auto">
               <p className={cn(
                 "text-[15px] leading-loose text-foreground/95 whitespace-pre-wrap select-text",
-                textDirection === 'rtl' && "text-right font-arabic"
+                textDirection === 'rtl' ? "text-right font-arabic" : "font-body"
               )}>
                 {entry.content}
               </p>
@@ -150,7 +167,7 @@ export default function ViewEntryDialog({ isOpen, setIsOpen, entry }: ViewEntryD
                     key={tag}
                     variant="outline"
                     className={cn(
-                      getTagColor(tag),
+                      getTagColorClasses(tag, userTagColors),
                       "px-3.5 py-1.5 text-sm font-medium transition-all duration-200 hover:scale-105 cursor-default"
                     )}
                   >
