@@ -30,17 +30,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build Next.js app with environment variables
+      - name: Create runtime config with secrets
         run: |
-          cat > .env.production << EOF
-          NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          cat > src/lib/runtime-config.ts << 'EOF'
+          // Auto-generated during build - DO NOT EDIT
+          export const SUPABASE_URL = '${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}';
+          export const SUPABASE_ANON_KEY = '${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}';
           EOF
           
-          echo ".env.production created:"
-          cat .env.production
-          
-          npm run build
+          echo "Runtime config created"
+          cat src/lib/runtime-config.ts
+
+      - name: Build Next.js app with environment variables
+        run: npm run build
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
