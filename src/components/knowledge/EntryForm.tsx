@@ -84,8 +84,10 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
   const addTag = (tagToAdd: string = newTag) => {
     if (!tagToAdd.trim()) return;
     const currentTags = form.getValues('tags') || [];
-    if (!currentTags.includes(tagToAdd.trim())) {
-      form.setValue('tags', [...currentTags, tagToAdd.trim()]);
+    const normalizedTag = tagToAdd.trim();
+
+    if (!currentTags.some(t => t.toLowerCase() === normalizedTag.toLowerCase())) {
+      form.setValue('tags', [...currentTags, normalizedTag]);
     }
     setNewTag('');
   };
@@ -145,7 +147,9 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
   }
 
   const currentTags = form.watch('tags');
-  const suggestedTags = availableTags.filter(tag => !currentTags.includes(tag.name));
+  const suggestedTags = availableTags.filter(tag =>
+    !currentTags.some(t => t.toLowerCase() === tag.name.toLowerCase())
+  );
 
   return (
     <Form {...form}>
@@ -237,8 +241,8 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
                           {suggestedTags.map((tag) => (
                             <Badge
                               key={tag.name}
-                              variant="secondary"
-                              className="cursor-pointer hover:bg-secondary/20 transition-colors"
+                              variant="outline"
+                              className={`cursor-pointer transition-colors ${getTagColor(tag.name)}`}
                               onClick={() => addTag(tag.name)}
                             >
                               {tag.name}

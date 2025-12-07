@@ -6,17 +6,18 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const getTagColor = (tag: string) => {
+  // Dark mode optimized colors
   const colors = [
-    'bg-red-100 text-red-800 border-red-200',
-    'bg-blue-100 text-blue-800 border-blue-200',
-    'bg-green-100 text-green-800 border-green-200',
-    'bg-yellow-100 text-yellow-800 border-yellow-200',
-    'bg-purple-100 text-purple-800 border-purple-200',
-    'bg-pink-100 text-pink-800 border-pink-200',
-    'bg-indigo-100 text-indigo-800 border-indigo-200',
-    'bg-orange-100 text-orange-800 border-orange-200',
-    'bg-teal-100 text-teal-800 border-teal-200',
-    'bg-cyan-100 text-cyan-800 border-cyan-200',
+    'bg-red-500/20 text-red-200 border-red-500/30',
+    'bg-blue-500/20 text-blue-200 border-blue-500/30',
+    'bg-green-500/20 text-green-200 border-green-500/30',
+    'bg-yellow-500/20 text-yellow-200 border-yellow-500/30',
+    'bg-purple-500/20 text-purple-200 border-purple-500/30',
+    'bg-pink-500/20 text-pink-200 border-pink-500/30',
+    'bg-indigo-500/20 text-indigo-200 border-indigo-500/30',
+    'bg-orange-500/20 text-orange-200 border-orange-500/30',
+    'bg-teal-500/20 text-teal-200 border-teal-500/30',
+    'bg-cyan-500/20 text-cyan-200 border-cyan-500/30',
   ];
   let hash = 0;
   for (let i = 0; i < tag.length; i++) {
