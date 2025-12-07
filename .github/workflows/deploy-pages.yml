@@ -39,6 +39,12 @@ jobs:
           echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY:0:40}..."
           npm run build
 
+      - name: Check built files for env vars
+        run: |
+          echo "Checking if env vars are in the built bundle..."
+          grep -r "fzfjsdg" out/ || echo "URL not found in bundle!"
+          grep -r "NEXT_PUBLIC_SUPABASE" out/*.html | head -5 || echo "No NEXT_PUBLIC references found"
+
       - name: Add .nojekyll file
         run: touch out/.nojekyll
 
