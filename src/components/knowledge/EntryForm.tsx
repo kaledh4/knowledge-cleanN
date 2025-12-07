@@ -106,13 +106,13 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
 
       if (entry) {
         const { error } = await supabase
-          .from('entries')
+          .from('knowledge_entries')
           .update(entryData)
           .eq('id', entry.id);
         if (error) throw error;
       } else {
         const { error } = await supabase
-          .from('entries')
+          .from('knowledge_entries')
           .insert([{ ...entryData, created_at: new Date().toISOString() }]);
         if (error) throw error;
       }

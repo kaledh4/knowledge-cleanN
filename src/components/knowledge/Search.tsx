@@ -36,7 +36,7 @@ export default function Search({ onSearch }: SearchProps) {
       if (!supabase) return;
       try {
         const { data, error } = await supabase
-          .from('entries')
+          .from('knowledge_entries')
           .select('tags');
 
         if (error) throw error;
@@ -75,7 +75,7 @@ export default function Search({ onSearch }: SearchProps) {
     setIsLoading(true);
     try {
       let queryBuilder = supabase
-        .from('entries')
+        .from('knowledge_entries')
         .select('*')
         .order('created_at', { ascending: false });
 
