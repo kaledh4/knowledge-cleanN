@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import * as tagService from '@/lib/tagService';
 
 interface TagData {
   name: string;
@@ -110,23 +111,20 @@ export default function CustomizeTagsPage() {
   );
 
   useEffect(() => {
-    fetchTags();
-    fetchTagColors();
-  }, []);
+    if (user) {
+      fetchTags();
+      fetchTagColors();
+    }
+  }, [user]);
 
   const fetchTags = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/tags');
-      if (response.ok) {
-        const data = await response.json();
-        setTags(data.tags || []);
-      } else {
-        throw new Error('Failed to fetch tags');
-      }
-    } catch (error) {
+      const fetchedTags = await tagService.getUserTags();
+      setTags(fetchedTags);
+    } catch (error: any) {
       console.error('Error fetching tags:', error);
-      setMessage({ type: 'error', text: 'Failed to load tags. Please try again.' });
+      setMessage({ type: 'error', text: error.message || 'Failed to load tags. Please try again.' });
     } finally {
       setLoading(false);
     }
@@ -134,46 +132,41 @@ export default function CustomizeTagsPage() {
 
   const fetchTagColors = async () => {
     try {
-      const response = await fetch('/api/tags/colors');
-      if (response.ok) {
-        const data = await response.json();
-        setTagColors(data.tagColors || {});
-      }
-    } catch (error) {
+      const colors = await tagService.getTagColors();
+      const mappedColors: TagColorsMap = {};
+      Object.entries(colors).forEach(([key, value]) => {
+        mappedColors[key] = {
+          backgroundColor: value.background_color,
+          borderColor: value.border_color,
+          textColor: value.text_color,
+        };
+      });
+      setTagColors(mappedColors);
+    } catch (error: any) {
       console.error('Error fetching tag colors:', error);
     }
   };
 
   const handleSaveTagColor = async (tagName: string) => {
     try {
-      const response = await fetch('/api/tags/colors', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tagName,
+      await tagService.saveTagColor(
+        tagName,
+        selectedColor.background,
+        selectedColor.border,
+        selectedColor.text
+      );
+
+      setMessage({ type: 'success', text: 'Tag color saved successfully!' });
+      setTagColors({
+        ...tagColors,
+        [tagName]: {
           backgroundColor: selectedColor.background,
           borderColor: selectedColor.border,
           textColor: selectedColor.text
-        })
+        }
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage({ type: 'success', text: data.message });
-        setTagColors({
-          ...tagColors,
-          [tagName]: {
-            backgroundColor: selectedColor.background,
-            borderColor: selectedColor.border,
-            textColor: selectedColor.text
-          }
-        });
-        setColorizingTag(null);
-      } else {
-        throw new Error(data.error || 'Failed to save tag color');
-      }
-    } catch (error) {
+      setColorizingTag(null);
+    } catch (error: any) {
       console.error('Error saving tag color:', error);
       setMessage({ type: 'error', text: error.message || 'Failed to save tag color' });
     }
@@ -181,21 +174,13 @@ export default function CustomizeTagsPage() {
 
   const handleResetTagColor = async (tagName: string) => {
     try {
-      const response = await fetch(`/api/tags/colors?tag=${encodeURIComponent(tagName)}`, {
-        method: 'DELETE'
-      });
+      await tagService.deleteTagColor(tagName);
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage({ type: 'success', text: data.message });
-        const newTagColors = { ...tagColors };
-        delete newTagColors[tagName];
-        setTagColors(newTagColors);
-      } else {
-        throw new Error(data.error || 'Failed to reset tag color');
-      }
-    } catch (error) {
+      setMessage({ type: 'success', text: 'Tag color reset to default!' });
+      const newTagColors = { ...tagColors };
+      delete newTagColors[tagName];
+      setTagColors(newTagColors);
+    } catch (error: any) {
       console.error('Error resetting tag color:', error);
       setMessage({ type: 'error', text: error.message || 'Failed to reset tag color' });
     }
@@ -207,7 +192,6 @@ export default function CustomizeTagsPage() {
       return;
     }
 
-    // Check if tag already exists
     if (tags.some(tag => tag.name.toLowerCase() === newTagNameToCreate.trim().toLowerCase())) {
       setMessage({ type: 'error', text: 'This tag already exists' });
       return;
@@ -215,25 +199,13 @@ export default function CustomizeTagsPage() {
 
     try {
       setCreatingTag(true);
+      await tagService.createTag(newTagNameToCreate.trim());
 
-      const response = await fetch('/api/tags', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newTagNameToCreate.trim() })
-      });
-
-      if (response.ok) {
-        setMessage({ type: 'success', text: `Tag "${newTagNameToCreate}" created successfully` });
-        setNewTagNameToCreate('');
-        fetchTags(); // Refresh the tags list
-
-        // Optionally, automatically open color customization for the new tag
-        setColorizingTag(newTagNameToCreate.trim());
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to create tag');
-      }
-    } catch (error) {
+      setMessage({ type: 'success', text: `Tag "${newTagNameToCreate}" created successfully` });
+      setNewTagNameToCreate('');
+      fetchTags();
+      setColorizingTag(newTagNameToCreate.trim());
+    } catch (error: any) {
       console.error('Error creating tag:', error);
       setMessage({ type: 'error', text: error.message || 'Failed to create tag' });
     } finally {
@@ -247,23 +219,13 @@ export default function CustomizeTagsPage() {
     }
 
     try {
-      const response = await fetch('/api/tags', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ oldTag, newTag: newTag.trim() })
-      });
+      await tagService.renameTag(oldTag, newTag.trim());
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage({ type: 'success', text: data.message });
-        setEditingTag(null);
-        setNewTagName('');
-        fetchTags(); // Refresh the tags list
-      } else {
-        throw new Error(data.error || 'Failed to update tag');
-      }
-    } catch (error) {
+      setMessage({ type: 'success', text: `Tag renamed from "${oldTag}" to "${newTag}"` });
+      setEditingTag(null);
+      setNewTagName('');
+      fetchTags();
+    } catch (error: any) {
       console.error('Error updating tag:', error);
       setMessage({ type: 'error', text: error.message || 'Failed to update tag' });
     }
@@ -271,33 +233,23 @@ export default function CustomizeTagsPage() {
 
   const handleDeleteTag = async (tag: string) => {
     try {
-      const response = await fetch(`/api/tags?tag=${encodeURIComponent(tag)}`, {
-        method: 'DELETE'
-      });
+      await tagService.deleteTag(tag);
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage({ type: 'success', text: data.message });
-        setDeletingTag(null);
-        fetchTags(); // Refresh the tags list
-      } else {
-        throw new Error(data.error || 'Failed to delete tag');
-      }
-    } catch (error) {
+      setMessage({ type: 'success', text: `Tag "${tag}" deleted successfully` });
+      setDeletingTag(null);
+      fetchTags();
+    } catch (error: any) {
       console.error('Error deleting tag:', error);
       setMessage({ type: 'error', text: error.message || 'Failed to delete tag' });
     }
   };
 
   const getTagClasses = (tagName: string): string => {
-    // Check if user has custom colors for this tag
     if (tagColors[tagName]) {
       const colors = tagColors[tagName];
       return `${colors.borderColor} ${colors.backgroundColor} ${colors.textColor} hover:opacity-80`;
     }
 
-    // Default colors for known tags
     switch (tagName) {
       case 'Important':
         return 'border-red-500/40 bg-red-900/50 text-red-300 hover:bg-red-900/80';
@@ -686,8 +638,8 @@ export default function CustomizeTagsPage() {
                       key={color.name}
                       onClick={() => setSelectedColor(color)}
                       className={`h-12 rounded-lg border-2 transition-all ${selectedColor.name === color.name
-                        ? 'border-primary scale-105'
-                        : 'border-transparent hover:border-gray-300'
+                          ? 'border-primary scale-105'
+                          : 'border-transparent hover:border-gray-300'
                         }`}
                       style={{
                         backgroundColor: color.hex + '20',
