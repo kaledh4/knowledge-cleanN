@@ -30,17 +30,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Inject Supabase credentials into source code
-        run: |
-          # Replace placeholders in supabase.ts with actual values
-          sed -i "s|SUPABASE_URL_PLACEHOLDER|${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}|g" src/lib/supabase.ts
-          sed -i "s|SUPABASE_ANON_KEY_PLACEHOLDER|${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}|g" src/lib/supabase.ts
-          
-          echo "Supabase config injected (first 50 chars):"
-          head -c 500 src/lib/supabase.ts
-
       - name: Build Next.js app
-        run: npm run build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          echo "🔨 Building with Supabase configuration from GitHub Secrets..."
+          echo "✓ NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:0:30}..."
+          echo "✓ NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:0:20}..."
+          npm run build
 
       - name: Add .nojekyll file
         run: touch out/.nojekyll

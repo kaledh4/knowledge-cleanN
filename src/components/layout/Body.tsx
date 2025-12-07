@@ -11,7 +11,7 @@ export default function Body({ children }: { children: React.ReactNode }) {
     setBodyClassName('antialiased loading');
     // Apply the class to the actual body element
     document.body.className = 'antialiased loading';
-    
+
     const timer = setTimeout(() => {
       document.body.classList.remove('loading');
       setBodyClassName('antialiased');
@@ -33,26 +33,25 @@ export default function Body({ children }: { children: React.ReactNode }) {
           __html: `
             if ('serviceWorker' in navigator) {
               window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').then(registration => {
-                  console.log('SW registered: ', registration);
+                // Get the base path from Next.js config (for GitHub Pages)
+                const basePath = '${process.env.NEXT_PUBLIC_BASE_PATH || ''}';
+                const swPath = basePath + '/sw.js';
+                
+                navigator.serviceWorker.register(swPath, { 
+                  scope: basePath + '/' 
+                }).then(registration => {
+                  console.log('✅ Service Worker registered successfully:', registration.scope);
                 }).catch(registrationError => {
-                  console.log('SW registration failed: ', registrationError);
-                  // Fallback: try to clear cache and reload if registration fails
-                  if ('caches' in window) {
-                    caches.keys().then(names => {
-                      names.forEach(name => {
-                        if (name.includes('workbox') || name.includes('precache')) {
-                          caches.delete(name);
-                        }
-                      });
-                    });
-                  }
+                  console.warn('⚠️ Service Worker registration failed:', registrationError.message);
+                  console.log('App will continue to work without offline support.');
+                  // Gracefully degrade - app works fine without SW
                 });
               });
             }
           `,
         }}
       />
+
     </>
   );
 }

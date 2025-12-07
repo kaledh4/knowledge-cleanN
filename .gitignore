@@ -1,6 +1,11 @@
 # Log files
 *.log
 
+# Environment variables (contains sensitive credentials)
+.env
+.env.local
+.env*.local
+
 # Data directory
 data/
 
