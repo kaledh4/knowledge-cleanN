@@ -7,9 +7,9 @@ import * as z from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { getSupabaseClient } from '@/lib/supabase';
 import { type KnowledgeEntry } from '@/lib/types';
-import { getTagColor } from '@/lib/utils';
+import { getTagColorClasses } from '@/lib/tag-utils';
 import { createKnowledgeEntry, updateKnowledgeEntry } from '@/lib/knowledge-actions';
-import { getUserTags, Tag } from '@/lib/tagService';
+import { getUserTags, getTagColors, Tag, TagColor } from '@/lib/tagService';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -26,6 +26,7 @@ import { Badge } from '@/components/ui/badge';
 import { Spinner } from '../ui/spinner';
 import { X, Plus } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
 
 const formSchema = z.object({
   title: z.string().optional(),
@@ -45,6 +46,7 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
   const [isLoading, setIsLoading] = useState(false);
   const [newTag, setNewTag] = useState('');
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
+  const [userTagColors, setUserTagColors] = useState<Record<string, TagColor>>({});
   const { toast } = useToast();
   const supabase = getSupabaseClient();
 
@@ -56,6 +58,17 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
       tags: [],
     },
   });
+
+  // Function to detect if text is Arabic
+  const isArabic = (text: string): boolean => {
+    const arabicRegex = /[\u0600-\u06FF]/;
+    return arabicRegex.test(text || '');
+  };
+
+  const titleValue = form.watch('title');
+  const contentValue = form.watch('content');
+  const isTitleArabic = isArabic(titleValue || '');
+  const isContentArabic = isArabic(contentValue || '');
 
   useEffect(() => {
     if (entry) {
@@ -70,15 +83,19 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
   }, [entry, initialData, form]);
 
   useEffect(() => {
-    const loadTags = async () => {
+    const loadTagsAndColors = async () => {
       try {
-        const tags = await getUserTags();
+        const [tags, colors] = await Promise.all([
+          getUserTags(),
+          getTagColors()
+        ]);
         setAvailableTags(tags);
+        setUserTagColors(colors);
       } catch (error) {
-        console.error('Failed to load tags:', error);
+        console.error('Failed to load tags data:', error);
       }
     };
-    loadTags();
+    loadTagsAndColors();
   }, []);
 
   const addTag = (tagToAdd: string = newTag) => {
@@ -86,6 +103,7 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
     const currentTags = form.getValues('tags') || [];
     const normalizedTag = tagToAdd.trim();
 
+    // Case-insensitive duplicate check
     if (!currentTags.some(t => t.toLowerCase() === normalizedTag.toLowerCase())) {
       form.setValue('tags', [...currentTags, normalizedTag]);
     }
@@ -159,9 +177,16 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Title (Optional)</FormLabel>
+              <FormLabel className="text-base font-medium">Title (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="Entry Title" {...field} className="bg-background/50" />
+                <Input
+                  placeholder="Entry Title"
+                  {...field}
+                  className={cn(
+                    "bg-background/50 h-11 text-lg transition-all focus:ring-2 focus:ring-primary/20",
+                    isTitleArabic ? "font-arabic text-right" : "font-body"
+                  )}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -173,11 +198,14 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
           name="content"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Content</FormLabel>
+              <FormLabel className="text-base font-medium">Content</FormLabel>
               <FormControl>
                 <Textarea
                   placeholder="Paste your text, links, or thoughts here..."
-                  className="min-h-[120px] resize-y bg-background/50"
+                  className={cn(
+                    "min-h-[160px] resize-y bg-background/50 text-base leading-relaxed p-4 transition-all focus:ring-2 focus:ring-primary/20",
+                    isContentArabic ? "font-arabic text-right" : "font-body"
+                  )}
                   {...field}
                 />
               </FormControl>
@@ -191,7 +219,7 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
           name="tags"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Tags</FormLabel>
+              <FormLabel className="text-base font-medium">Tags</FormLabel>
               <FormControl>
                 <div className="space-y-4">
                   <div className="flex gap-2">
@@ -199,7 +227,7 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
                       value={newTag}
                       onChange={(e) => setNewTag(e.target.value)}
                       placeholder="Add a tag..."
-                      className="bg-background/50"
+                      className="bg-background/50 h-10 font-body"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
@@ -207,42 +235,50 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
                         }
                       }}
                     />
-                    <Button type="button" variant="outline" onClick={() => addTag()}>
+                    <Button type="button" variant="outline" onClick={() => addTag()} className="h-10 px-4">
                       <Plus className="h-4 w-4" />
                     </Button>
                   </div>
 
                   {/* Selected Tags */}
-                  <div className="flex flex-wrap gap-2.5">
-                    {field.value.map((tag) => (
-                      <Badge
-                        key={tag}
-                        className={`flex items-center gap-1.5 px-3.5 py-1.5 text-sm transition-all duration-200 hover:scale-105 ${getTagColor(tag)}`}
-                        variant="outline"
-                      >
-                        {tag}
-                        <button
-                          type="button"
-                          onClick={() => removeTag(tag)}
-                          className="ml-1 hover:bg-white/20 rounded-full p-1 transition-colors"
+                  {field.value.length > 0 && (
+                    <div className="flex flex-wrap gap-2.5 p-1">
+                      {field.value.map((tag) => (
+                        <Badge
+                          key={tag}
+                          className={cn(
+                            "flex items-center gap-1.5 cursor-default",
+                            getTagColorClasses(tag, userTagColors)
+                          )}
+                          variant="outline"
                         >
-                          <X className="h-3.5 w-3.5" />
-                        </button>
-                      </Badge>
-                    ))}
-                  </div>
+                          {tag}
+                          <button
+                            type="button"
+                            onClick={() => removeTag(tag)}
+                            className="ml-1 hover:bg-white/20 rounded-full p-0.5 transition-colors"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
 
                   {/* Suggested Tags */}
                   {suggestedTags.length > 0 && (
-                    <div className="space-y-2.5">
+                    <div className="space-y-2.5 pt-2">
                       <p className="text-sm font-medium text-muted-foreground">Suggested Tags:</p>
-                      <ScrollArea className="h-24 w-full rounded-lg border border-white/10 bg-card/30 backdrop-blur-sm p-3">
+                      <ScrollArea className="h-28 w-full rounded-lg border border-white/10 bg-card/30 backdrop-blur-sm p-3">
                         <div className="flex flex-wrap gap-2.5">
                           {suggestedTags.map((tag) => (
                             <Badge
                               key={tag.name}
                               variant="outline"
-                              className={`cursor-pointer px-3.5 py-1.5 text-sm transition-all duration-200 hover:scale-105 ${getTagColor(tag.name)}`}
+                              className={cn(
+                                "cursor-pointer transition-all duration-200 hover:scale-105",
+                                getTagColorClasses(tag.name, userTagColors)
+                              )}
                               onClick={() => addTag(tag.name)}
                             >
                               {tag.name}
@@ -259,7 +295,7 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
           )}
         />
 
-        <Button type="submit" className="w-full sm:w-auto" disabled={isLoading}>
+        <Button type="submit" className="w-full sm:w-auto h-11 px-8 text-base font-medium" disabled={isLoading}>
           {isLoading && <Spinner className="mr-2" />}
           {entry ? 'Save Changes' : 'Add to Vault'}
         </Button>
