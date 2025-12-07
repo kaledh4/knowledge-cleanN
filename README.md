@@ -1,117 +1,119 @@
-# Knowledge Clean - Personal Knowledge Vault ()
+# 🧠 KnowledgeVerse
 
-A modern Next.js application for managing personal knowledge entries with authentication and search capabilities.
+A modern personal knowledge management system built with Next.js and Supabase.
 
-## 🚀 Deployment Status Test
+[![Live Demo](https://img.shields.io/badge/demo-live-success?style=flat-square)](https://kaledh4.github.io/knowledge-cleanN/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.3-black?style=flat-square&logo=next.js)](https://nextjs.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-2.39-green?style=flat-square&logo=supabase)](https://supabase.com/)
 
-**Latest Update**: October 8, 2025 - All users cleared, fresh authentication system ready
-- ✅ Database schema migrations fixed
-- ✅ Sign-up page working
-- ✅ Data persistence configured for CapRover
-- 🔄 **Test Sign-up**: Create new account at `/sign-up` to verify deployment
+## ✨ Features
 
-## Features
+- 🔐 **Secure Authentication** - Email/password auth with Supabase
+- � **Knowledge Management** - Create, edit, and organize your knowledge
+- 🏷️ **Tag System** - Organize with customizable colored tags
+- � **Search & Filter** - Find what you need quickly
+- 📱 **PWA Support** - Install as an app, works offline
+- � **Export** - Download your knowledge base as JSON
+- 🤖 **AI Insights** - Optional daily knowledge analysis
 
-- 🔐 Secure authentication with NextAuth.js
-- 📝 Create, read, update, and delete knowledge entries
-- 🔍 Search and filter knowledge entries
-- 💾 SQLite database with better-sqlite3
-- 🌐 PWA support for offline usage
-- 🐳 Docker ready for easy deployment
+## 🚀 Quick Start
 
-## Tech Stack
+### Prerequisites
 
-- **Frontend**: Next.js 15, React 18, TypeScript
-- **Styling**: Tailwind CSS, Radix UI components
-- **Database**: SQLite with better-sqlite3
-- **Authentication**: NextAuth.js
-- **Deployment**: Docker, CapRover compatible
+- Node.js 20+
+- A Supabase account ([sign up free](https://supabase.com))
 
-## Quick Start
+### Installation
 
-### Development
-
-1. Install dependencies:
-```bash
-npm install
-```
-
-2. Set up environment variables:
-```bash
-cp .env.example .env.local
-```
-
-3. Initialize the database:
-```bash
-npm run setup-db
-```
-
-4. Start the development server:
-```bash
-npm run dev
-```
-
-### Production Deployment with CapRover
-
-1. **Prerequisites**:
-   - CapRover instance running
-   - Domain/subdomain configured
-
-2. **Environment Variables** (set in CapRover):
-   ```
-   NEXTAUTH_SECRET=your-super-secret-key-here
-   NEXTAUTH_URL=https://your-app-domain.com
-   DB_PATH=/usr/src/app/data/knowledge.db
-   NODE_ENV=production
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/kaledh4/knowledge-cleanN.git
+   cd knowledge-cleanN
    ```
 
-3. **Persistent Storage & Data Safety**:
-   - ⚠️ **IMPORTANT**: Configure persistent directory in CapRover to prevent data loss:
-     - Path in App: `/usr/src/app/data`
-     - Label: `database_storage`
-   - ✅ **Data Persistence**: Your database will survive deployments and container restarts
-   - 💾 **Backup Recommended**: Regular backups of `/usr/src/app/data/knowledge.db`
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-4. **Deploy**:
-   - Upload project as TAR file, or
-   - Connect Git repository with webhook
-   - The `captain-definition` file is already configured
+3. **Set up Supabase**
+   - Create a new project at [supabase.com](https://supabase.com)
+   - Run the SQL migrations from `/migrations` folder in order
+   - Copy your project URL and anon key
 
-5. **Port Configuration**:
-   - Container HTTP Port: `3000`
-   - The app will be available on your configured domain
+4. **Configure environment**
+   
+   Create `.env.local`:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+   ```
 
-## Database
+5. **Run locally**
+   ```bash
+   npm run dev
+   ```
+   
+   Open [http://localhost:3000](http://localhost:3000)
 
-The application uses SQLite with better-sqlite3 for optimal performance:
-- Database file: `knowledge.db`
-- Production location: `/usr/src/app/data/knowledge.db`
-- Automatically created on first run
-- Migrations run automatically
+## 📦 Tech Stack
 
-## Authentication
+- **Frontend:** Next.js 15, React 18, TypeScript, Tailwind CSS
+- **Backend:** Supabase (PostgreSQL, Auth, Real-time)
+- **UI Components:** Radix UI
+- **Deployment:** GitHub Pages (static export)
 
-- Email/password authentication
-- Optional GitHub OAuth (configure `GITHUB_ID` and `GITHUB_SECRET`)
-- Session management with JWT tokens
+## 🌐 Deployment
 
-## Scripts
+This app is configured for GitHub Pages deployment via GitHub Actions.
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm start` - Start production server
-- `npm run setup-db` - Initialize database
-- `npm run lint` - Run ESLint
-- `npm run typecheck` - Run TypeScript checks
+### Deploy to GitHub Pages
 
-## Production Notes
+1. Fork this repository
+2. Go to Settings → Pages → Source: "GitHub Actions"
+3. Add secrets: `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+4. Push to main branch - automatic deployment!
 
-- Uses Node.js 20 Alpine in Docker for minimal image size
-- Better-sqlite3 compiled with native support
-- Health checks configured for container monitoring
-- Persistent volume required for database storage
-- PWA enabled for offline capability
+Your app will be at: `https://[username].github.io/knowledge-cleanN/`
 
-## License
+### Deploy to Other Platforms
 
-MIT License
+**Vercel** (Recommended for full features):
+```bash
+vercel
+```
+
+**Netlify, Railway, or any Node.js host**:
+```bash
+npm run build
+npm start
+```
+
+## 📝 Database Setup
+
+Execute these SQL files in your Supabase SQL Editor (in order):
+
+1. `migrations/001-initial-schema-version.sql`
+2. `migrations/002-create-initial-tables.sql`
+3. `migrations/003-fix-users-table-schema.sql`
+4. `migrations/006-create-tags-table.sql`
+5. `supabase_schema.sql` (optional, for AI features)
+
+## 🔒 Security
+
+- Row-Level Security (RLS) enabled on all tables
+- JWT-based authentication
+- Secure password hashing
+- Environment variables for sensitive data
+
+## 🤝 Contributing
+
+Contributions welcome! Feel free to open issues or submit pull requests.
+
+## 📄 License
+
+MIT License - see LICENSE file for details.
+
+---
+
+**Built with ❤️ using Next.js and Supabase**
