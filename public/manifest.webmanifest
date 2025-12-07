@@ -2,8 +2,8 @@
   "name": "KnowledgeVerse",
   "short_name": "KVerse",
   "description": "Your personal AI-powered learning and knowledge companion.",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "/knowledge-cleanN/",
+  "scope": "/knowledge-cleanN/",
   "display": "standalone",
   "display_override": [
     "standalone",
@@ -12,27 +12,68 @@
   "orientation": "portrait-primary",
   "background_color": "#0f0f23",
   "theme_color": "#9333ea",
-  "categories": ["education", "productivity", "utilities"],
+  "categories": [
+    "education",
+    "productivity",
+    "utilities"
+  ],
   "icons": [
-    { "src": "/static/icons/icon-72x72.png", "sizes": "72x72", "type": "image/png" },
-    { "src": "/static/icons/icon-96x96.png", "sizes": "96x96", "type": "image/png" },
-    { "src": "/static/icons/icon-128x128.png", "sizes": "128x128", "type": "image/png" },
-    { "src": "/static/icons/icon-144x144.png", "sizes": "144x144", "type": "image/png" },
-    { "src": "/static/icons/icon-152x152.png", "sizes": "152x152", "type": "image/png" },
-    { "src": "/static/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/static/icons/icon-384x384.png", "sizes": "384x384", "type": "image/png" },
-    { "src": "/static/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "/static/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "/knowledge-cleanN/static/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    },
+    {
+      "src": "/knowledge-cleanN/static/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png"
+    },
+    {
+      "src": "/knowledge-cleanN/static/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "/knowledge-cleanN/static/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png"
+    },
+    {
+      "src": "/knowledge-cleanN/static/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png"
+    },
+    {
+      "src": "/knowledge-cleanN/static/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/knowledge-cleanN/static/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png"
+    },
+    {
+      "src": "/knowledge-cleanN/static/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/knowledge-cleanN/static/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ],
   "screenshots": [
     {
-      "src": "/static/screenshots/screenshot1.png",
+      "src": "/knowledge-cleanN/static/screenshots/screenshot1.png",
       "sizes": "1080x1920",
       "type": "image/png",
       "form_factor": "narrow"
     },
     {
-      "src": "/static/screenshots/screenshot2.png",
+      "src": "/knowledge-cleanN/static/screenshots/screenshot2.png",
       "sizes": "1080x1920",
       "type": "image/png",
       "form_factor": "narrow"
@@ -44,21 +85,31 @@
       "short_name": "New",
       "description": "Create a new knowledge entry",
       "url": "/?action=new-entry",
-      "icons": [{ "src": "/static/icons/icon-96x96.png", "sizes": "96x96" }]
+      "icons": [
+        {
+          "src": "/static/icons/icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
     },
     {
       "name": "View All Entries",
       "short_name": "Vault",
       "description": "View all your knowledge entries",
       "url": "/",
-      "icons": [{ "src": "/static/icons/icon-96x96.png", "sizes": "96x96" }]
+      "icons": [
+        {
+          "src": "/static/icons/icon-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
     }
   ],
   "launch_handler": {
     "client_mode": "focus-existing"
   },
   "share_target": {
-    "action": "/",
+    "action": "/knowledge-cleanN/",
     "method": "GET",
     "enctype": "application/x-www-form-urlencoded",
     "params": {
