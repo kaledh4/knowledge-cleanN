@@ -9,6 +9,7 @@ import { KnowledgeEntry } from '@/lib/types';
 import { getSupabaseClient } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { getUserTags } from '@/lib/tagService';
 import {
   Popover,
   PopoverContent,
@@ -33,29 +34,15 @@ export default function Search({ onSearch }: SearchProps) {
   // Load existing tags
   useEffect(() => {
     const loadTags = async () => {
-      if (!supabase) return;
       try {
-        const { data, error } = await supabase
-          .from('entries')
-          .select('tags');
-
-        if (error) throw error;
-
-        if (data) {
-          const tags = new Set<string>();
-          data.forEach(entry => {
-            if (Array.isArray(entry.tags)) {
-              entry.tags.forEach((tag: string) => tags.add(tag));
-            }
-          });
-          setAllTags(Array.from(tags));
-        }
+        const tags = await getUserTags();
+        setAllTags(tags.map(t => t.name));
       } catch (error) {
         console.error('Failed to load tags:', error);
       }
     };
     loadTags();
-  }, [supabase]);
+  }, []);
 
   const filteredTags = allTags.filter(tag =>
     tag.toLowerCase().includes(tagInputValue.toLowerCase()) &&

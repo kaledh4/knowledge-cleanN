@@ -12,8 +12,57 @@ export interface TagColor {
     text_color: string;
 }
 
+const DEFAULT_TAGS = [
+    'Personal',
+    'Work',
+    'Ideas',
+    'To Read',
+    'Important',
+    'Learning',
+    'Tech',
+    'Health'
+];
+
 /**
- * Get all tags used by the current user
+ * Initialize default tags for a user if they have none
+ */
+export async function initializeDefaultTags(userId: string): Promise<void> {
+    const supabase = getSupabaseClient();
+    if (!supabase) return;
+
+    // Check if user has any tags in tag_colors
+    const { count, error } = await supabase
+        .from('tag_colors')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId);
+
+    if (error) {
+        console.error('Error checking tags:', error);
+        return;
+    }
+
+    // If no tags, insert defaults
+    if (count === 0) {
+        const defaultTagColors = DEFAULT_TAGS.map(tag => ({
+            user_id: userId,
+            tag_name: tag,
+            background_color: 'bg-primary/10',
+            border_color: 'border-primary/20',
+            text_color: 'text-primary'
+        }));
+
+        const { error: insertError } = await supabase
+            .from('tag_colors')
+            .insert(defaultTagColors);
+
+        if (insertError) {
+            console.error('Error initializing default tags:', insertError);
+        }
+    }
+}
+
+/**
+ * Get all tags used by the current user (merges used tags and defined tags)
  */
 export async function getUserTags(): Promise<Tag[]> {
     const supabase = getSupabaseClient();
@@ -22,7 +71,11 @@ export async function getUserTags(): Promise<Tag[]> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Not authenticated');
 
-    // Get all entries for the user
+    // Initialize defaults if needed (fire and forget to not block UI too long, 
+    // but ideally we await if we want them to show up immediately on first load)
+    await initializeDefaultTags(user.id);
+
+    // Get all entries for the user to count usage
     const { data: entries, error } = await supabase
         .from('entries')
         .select('tags')
@@ -33,19 +86,22 @@ export async function getUserTags(): Promise<Tag[]> {
     // Count tag usage
     const tagCounts: Record<string, number> = {};
     entries?.forEach(entry => {
-        entry.tags?.forEach((tag: string) => {
-            tagCounts[tag] = (tagCounts[tag] || 0) + 1;
-        });
+        if (Array.isArray(entry.tags)) {
+            entry.tags.forEach((tag: string) => {
+                tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+            });
+        }
     });
 
-    // Get custom colors to include tags that have colors but no usage yet
+    // Get custom colors/defined tags
     const { data: colors } = await supabase
         .from('tag_colors')
         .select('tag_name')
         .eq('user_id', user.id);
 
+    // Ensure all defined tags are in the list, even if usage is 0
     colors?.forEach(color => {
-        if (!tagCounts[color.tag_name]) {
+        if (tagCounts[color.tag_name] === undefined) {
             tagCounts[color.tag_name] = 0;
         }
     });
@@ -53,7 +109,11 @@ export async function getUserTags(): Promise<Tag[]> {
     return Object.entries(tagCounts).map(([name, usageCount]) => ({
         name,
         usageCount,
-    })).sort((a, b) => b.usageCount - a.usageCount);
+    })).sort((a, b) => {
+        // Sort by usage count desc, then by name asc
+        if (b.usageCount !== a.usageCount) return b.usageCount - a.usageCount;
+        return a.name.localeCompare(b.name);
+    });
 }
 
 /**
@@ -246,9 +306,9 @@ export async function createTag(tagName: string): Promise<void> {
         .insert({
             user_id: user.id,
             tag_name: tagName,
-            background_color: 'bg-accent/20',
-            border_color: 'border-accent/30',
-            text_color: 'text-accent-foreground',
+            background_color: 'bg-primary/10',
+            border_color: 'border-primary/20',
+            text_color: 'text-primary',
         });
 
     if (error) throw error;

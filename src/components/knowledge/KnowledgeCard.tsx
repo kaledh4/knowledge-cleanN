@@ -83,7 +83,7 @@ export default function KnowledgeCard({ entry, onUpdate, onDelete }: KnowledgeCa
         onSuccess={onDelete}
       />
       <Card
-        className="flex h-full transform-gpu flex-col bg-card/70 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-primary/20 hover:shadow-lg cursor-pointer relative overflow-hidden"
+        className="glass-card flex h-full transform-gpu flex-col transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-cyan-500/20 hover:shadow-lg cursor-pointer relative overflow-hidden border-white/5"
         onClick={handleCardClick}
         style={{ direction: textDirection } as React.CSSProperties}
       >

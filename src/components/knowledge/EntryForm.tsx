@@ -9,12 +9,12 @@ import { getSupabaseClient } from '@/lib/supabase';
 import { type KnowledgeEntry } from '@/lib/types';
 import { getTagColor } from '@/lib/utils';
 import { createKnowledgeEntry, updateKnowledgeEntry } from '@/lib/knowledge-actions';
+import { getUserTags, Tag } from '@/lib/tagService';
 
 import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -25,6 +25,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Spinner } from '../ui/spinner';
 import { X, Plus } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const formSchema = z.object({
   title: z.string().optional(),
@@ -43,6 +44,7 @@ type EntryFormProps = {
 export default function EntryForm({ entry, onSuccess, initialData }: EntryFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [newTag, setNewTag] = useState('');
+  const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const { toast } = useToast();
   const supabase = getSupabaseClient();
 
@@ -67,11 +69,23 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
     }
   }, [entry, initialData, form]);
 
-  const addTag = () => {
-    if (!newTag.trim()) return;
+  useEffect(() => {
+    const loadTags = async () => {
+      try {
+        const tags = await getUserTags();
+        setAvailableTags(tags);
+      } catch (error) {
+        console.error('Failed to load tags:', error);
+      }
+    };
+    loadTags();
+  }, []);
+
+  const addTag = (tagToAdd: string = newTag) => {
+    if (!tagToAdd.trim()) return;
     const currentTags = form.getValues('tags') || [];
-    if (!currentTags.includes(newTag.trim())) {
-      form.setValue('tags', [...currentTags, newTag.trim()]);
+    if (!currentTags.includes(tagToAdd.trim())) {
+      form.setValue('tags', [...currentTags, tagToAdd.trim()]);
     }
     setNewTag('');
   };
@@ -130,6 +144,9 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
     }
   }
 
+  const currentTags = form.watch('tags');
+  const suggestedTags = availableTags.filter(tag => !currentTags.includes(tag.name));
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 pt-2">
@@ -140,7 +157,7 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
             <FormItem>
               <FormLabel>Title (Optional)</FormLabel>
               <FormControl>
-                <Input placeholder="Entry Title" {...field} />
+                <Input placeholder="Entry Title" {...field} className="bg-background/50" />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -156,7 +173,7 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
               <FormControl>
                 <Textarea
                   placeholder="Paste your text, links, or thoughts here..."
-                  className="min-h-[120px] resize-y"
+                  className="min-h-[120px] resize-y bg-background/50"
                   {...field}
                 />
               </FormControl>
@@ -178,6 +195,7 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
                       value={newTag}
                       onChange={(e) => setNewTag(e.target.value)}
                       placeholder="Add a tag..."
+                      className="bg-background/50"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') {
                           e.preventDefault();
@@ -185,11 +203,12 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
                         }
                       }}
                     />
-                    <Button type="button" variant="outline" onClick={addTag}>
+                    <Button type="button" variant="outline" onClick={() => addTag()}>
                       <Plus className="h-4 w-4" />
                     </Button>
                   </div>
 
+                  {/* Selected Tags */}
                   <div className="flex flex-wrap gap-2">
                     {field.value.map((tag) => (
                       <Badge
@@ -208,6 +227,27 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
                       </Badge>
                     ))}
                   </div>
+
+                  {/* Suggested Tags */}
+                  {suggestedTags.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-xs text-muted-foreground">Suggested Tags:</p>
+                      <ScrollArea className="h-20 w-full rounded-md border bg-muted/20 p-2">
+                        <div className="flex flex-wrap gap-2">
+                          {suggestedTags.map((tag) => (
+                            <Badge
+                              key={tag.name}
+                              variant="secondary"
+                              className="cursor-pointer hover:bg-secondary/20 transition-colors"
+                              onClick={() => addTag(tag.name)}
+                            >
+                              {tag.name}
+                            </Badge>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    </div>
+                  )}
                 </div>
               </FormControl>
               <FormMessage />
