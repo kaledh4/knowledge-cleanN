@@ -97,10 +97,10 @@ export default function ViewEntryDialog({ isOpen, setIsOpen, entry }: ViewEntryD
             )}>
               <h4 className="text-sm font-medium text-foreground">Content</h4>
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
                 onClick={handleCopyContent}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 text-muted-foreground hover:text-foreground hover:bg-muted/50"
               >
                 <Copy className="h-3 w-3" />
                 Copy

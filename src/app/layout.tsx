@@ -23,7 +23,7 @@ export default function RootLayout({
         <meta name="application-name" content="KnowledgeVerse" />
         <meta name="msapplication-TileColor" content="#9333ea" />
         <meta name="theme-color" content="#9333ea" />
-        <link rel="manifest" href="/manifest.webmanifest" />
+        <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" sizes="180x180" href="/static/icons/icon-192.png" />
         <style>
           {`

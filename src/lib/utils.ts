@@ -6,18 +6,18 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const getTagColor = (tag: string) => {
-  // Dark mode optimized colors
+  // Vibrant, bold colors for tags (Dark Mode Optimized)
   const colors = [
-    'bg-red-500/20 text-red-200 border-red-500/30',
-    'bg-blue-500/20 text-blue-200 border-blue-500/30',
-    'bg-green-500/20 text-green-200 border-green-500/30',
-    'bg-yellow-500/20 text-yellow-200 border-yellow-500/30',
-    'bg-purple-500/20 text-purple-200 border-purple-500/30',
-    'bg-pink-500/20 text-pink-200 border-pink-500/30',
-    'bg-indigo-500/20 text-indigo-200 border-indigo-500/30',
-    'bg-orange-500/20 text-orange-200 border-orange-500/30',
-    'bg-teal-500/20 text-teal-200 border-teal-500/30',
-    'bg-cyan-500/20 text-cyan-200 border-cyan-500/30',
+    'bg-red-600 text-white border-red-500 shadow-sm shadow-red-900/20',
+    'bg-blue-600 text-white border-blue-500 shadow-sm shadow-blue-900/20',
+    'bg-green-600 text-white border-green-500 shadow-sm shadow-green-900/20',
+    'bg-yellow-600 text-white border-yellow-500 shadow-sm shadow-yellow-900/20',
+    'bg-purple-600 text-white border-purple-500 shadow-sm shadow-purple-900/20',
+    'bg-pink-600 text-white border-pink-500 shadow-sm shadow-pink-900/20',
+    'bg-indigo-600 text-white border-indigo-500 shadow-sm shadow-indigo-900/20',
+    'bg-orange-600 text-white border-orange-500 shadow-sm shadow-orange-900/20',
+    'bg-teal-600 text-white border-teal-500 shadow-sm shadow-teal-900/20',
+    'bg-cyan-600 text-white border-cyan-500 shadow-sm shadow-cyan-900/20',
   ];
   let hash = 0;
   for (let i = 0; i < tag.length; i++) {

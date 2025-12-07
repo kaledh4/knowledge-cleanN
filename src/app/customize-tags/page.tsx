@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Brain, Edit3, Trash2, Tag as TagIcon, Search, Plus, Check, X, AlertCircle, Palette, RefreshCw, Loader2 } from 'lucide-react';
+import Logo from '@/components/layout/Logo';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -273,8 +274,7 @@ export default function CustomizeTagsPage() {
           <div className="container mx-auto max-w-7xl px-4 py-4">
             <div className="flex items-center justify-between">
               <Link href="/" className="flex items-center space-x-2">
-                <Brain className="h-6 w-6 text-primary" />
-                <span className="font-headline text-xl font-bold">KnowledgeVerse</span>
+                <Logo />
               </Link>
               <Link href="/">
                 <Button variant="outline">Back to Vault</Button>
@@ -298,13 +298,14 @@ export default function CustomizeTagsPage() {
 
   return (
     <div className="min-h-screen bg-background">
+
+
       {/* Header */}
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto max-w-7xl px-4 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center space-x-2">
-              <Brain className="h-6 w-6 text-primary" />
-              <span className="font-headline text-xl font-bold">KnowledgeVerse</span>
+              <Logo />
             </Link>
             <Link href="/">
               <Button variant="outline">Back to Vault</Button>
@@ -638,8 +639,8 @@ export default function CustomizeTagsPage() {
                       key={color.name}
                       onClick={() => setSelectedColor(color)}
                       className={`h-12 rounded-lg border-2 transition-all ${selectedColor.name === color.name
-                          ? 'border-primary scale-105'
-                          : 'border-transparent hover:border-gray-300'
+                        ? 'border-primary scale-105'
+                        : 'border-transparent hover:border-gray-300'
                         }`}
                       style={{
                         backgroundColor: color.hex + '20',
