@@ -1,4 +1,4 @@
-import type {NextConfig} from 'next';
+import type { NextConfig } from 'next';
 
 const withPWA = require('next-pwa')({
   dest: 'public',
@@ -47,6 +47,9 @@ const withPWA = require('next-pwa')({
 
 const nextConfig: NextConfig = {
   /* config options here */
+  output: 'export',
+  basePath: '/knowledge-cleanN',
+  assetPrefix: '/knowledge-cleanN/',
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -54,6 +57,7 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
@@ -74,65 +78,6 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
-  },
-  // Add CSP headers and CORS support
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'Content-Security-Policy',
-            value: [
-              "default-src * 'unsafe-inline' 'unsafe-eval'",
-              "script-src * 'unsafe-inline' 'unsafe-eval' blob: data:",
-              "style-src * 'unsafe-inline'",
-              "img-src * data: blob: file:",
-              "font-src * data:",
-              "connect-src * ws: wss:",
-              "frame-src *",
-              "worker-src * blob: 'unsafe-inline'",
-              "child-src * blob:",
-              "object-src 'none'",
-              "base-uri 'self'",
-              "form-action 'self'",
-              "frame-ancestors 'none'",
-              "upgrade-insecure-requests"
-            ].join('; ')
-          }
-        ]
-      },
-      {
-        // Add CORS headers specifically for API routes
-        source: '/api/:path*',
-        headers: [
-          {
-            key: 'Access-Control-Allow-Origin',
-            value: '*',
-          },
-          {
-            key: 'Access-Control-Allow-Methods',
-            value: 'GET, POST, PUT, DELETE, OPTIONS',
-          },
-          {
-            key: 'Access-Control-Allow-Headers',
-            value: 'Content-Type, Authorization',
-          },
-        ],
-      },
-    ];
-  },
-  // Exclude better-sqlite3 from client-side bundling
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        path: false,
-        better_sqlite3: false,
-      };
-    }
-    return config;
   },
 };
 
