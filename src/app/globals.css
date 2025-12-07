@@ -95,12 +95,13 @@
     line-height: 1.6;
   }
 
-  /* Better Arabic text rendering */
+  /* Better Arabic text rendering with Cairo */
   [dir="rtl"],
   .rtl {
-    font-family: var(--font-noto-arabic), 'Noto Sans Arabic', sans-serif;
+    font-family: var(--font-cairo), 'Cairo', sans-serif;
     letter-spacing: 0;
-    line-height: 1.8;
+    line-height: 1.9;
+    font-weight: 500;
   }
 
   /* Improved heading styles */
@@ -111,14 +112,16 @@
   h5,
   h6 {
     @apply font-headline;
-    letter-spacing: -0.02em;
-    line-height: 1.2;
+    letter-spacing: -0.025em;
+    line-height: 1.25;
+    font-weight: 700;
   }
 
   /* Better paragraph spacing */
   p {
-    line-height: 1.7;
-    letter-spacing: 0.01em;
+    line-height: 1.75;
+    letter-spacing: 0.005em;
+    font-weight: 400;
   }
 }
 

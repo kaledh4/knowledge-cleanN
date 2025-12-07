@@ -1,23 +1,29 @@
 import type { Metadata } from "next";
-import { Inter, Space_Grotesk, Noto_Sans_Arabic } from 'next/font/google';
+import { Cairo, Plus_Jakarta_Sans, Outfit } from 'next/font/google';
 import "./globals.css";
 import Body from "@/components/layout/Body";
 
-const inter = Inter({
+// Plus Jakarta Sans - Modern, clean, professional body font
+const plusJakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  variable: '--font-inter',
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-jakarta',
   display: 'swap',
 });
 
-const spaceGrotesk = Space_Grotesk({
-  subsets: ['latin'],
-  variable: '--font-space-grotesk',
+// Cairo - Premium Arabic font with Latin support
+const cairo = Cairo({
+  subsets: ['arabic', 'latin'],
+  weight: ['400', '500', '600', '700', '800', '900'],
+  variable: '--font-cairo',
   display: 'swap',
 });
 
-const notoSansArabic = Noto_Sans_Arabic({
-  subsets: ['arabic'],
-  variable: '--font-noto-arabic',
+// Outfit - Bold, modern headlines
+const outfit = Outfit({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800', '900'],
+  variable: '--font-outfit',
   display: 'swap',
 });
 
@@ -32,7 +38,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`dark ${inter.variable} ${spaceGrotesk.variable} ${notoSansArabic.variable}`}>
+    <html lang="en" className={`dark ${plusJakarta.variable} ${outfit.variable} ${cairo.variable}`}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
         <meta name="mobile-web-app-capable" content="yes" />

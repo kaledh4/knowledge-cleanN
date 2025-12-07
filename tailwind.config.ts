@@ -17,9 +17,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        body: ['var(--font-inter)', 'var(--font-noto-arabic)', 'Inter', 'sans-serif'],
-        headline: ['var(--font-space-grotesk)', 'Space Grotesk', 'sans-serif'],
-        arabic: ['var(--font-noto-arabic)', 'Noto Sans Arabic', 'sans-serif'],
+        body: ['var(--font-jakarta)', 'var(--font-cairo)', 'Plus Jakarta Sans', 'Cairo', 'sans-serif'],
+        headline: ['var(--font-outfit)', 'Outfit', 'sans-serif'],
+        arabic: ['var(--font-cairo)', 'Cairo', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {
