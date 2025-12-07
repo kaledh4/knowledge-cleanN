@@ -1,5 +1,6 @@
 'use client';
-import { useSession } from 'next-auth/react';
+
+import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { Spinner } from '@/components/ui/spinner';
@@ -9,22 +10,21 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 
 export default function SignUpPage() {
-  const { status } = useSession();
+  const { user, loading: authLoading, signUp } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    if (status === 'authenticated') {
+    if (user) {
       router.push('/');
     }
-  }, [status, router]);
+  }, [user, router]);
 
-  if (status === 'loading' || status === 'authenticated') {
+  if (authLoading || user) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Spinner size="large" />
@@ -36,23 +36,15 @@ export default function SignUpPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    try {
-      const res = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, name }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error || 'Registration failed');
-      } else {
-        setSuccess(true);
-        setTimeout(() => router.push('/login'), 1000);
-      }
-    } catch (err) {
-      setError('Network error');
-    } finally {
+
+    const result = await signUp(email, password);
+
+    if (result.error) {
+      setError(result.error);
       setLoading(false);
+    } else {
+      setSuccess(true);
+      setTimeout(() => router.push('/'), 1500);
     }
   };
 
@@ -71,49 +63,39 @@ export default function SignUpPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
-            <Input 
-              id="name" 
-              name="name"
-              autoComplete="name"
-              value={name} 
-              onChange={(e) => setName(e.target.value)} 
-              placeholder="Jane Doe" 
-            />
-          </div>
-          <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input 
-              id="email" 
+            <Input
+              id="email"
               name="email"
-              type="email" 
+              type="email"
               autoComplete="email"
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
-              placeholder="you@example.com" 
-              required 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              required
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
-            <Input 
-              id="password" 
+            <Input
+              id="password"
               name="password"
-              type="password" 
+              type="password"
               autoComplete="new-password"
-              value={password} 
-              onChange={(e) => setPassword(e.target.value)} 
-              placeholder="Choose a strong password" 
-              required 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Choose a strong password (min 6 characters)"
+              minLength={6}
+              required
             />
           </div>
           {error && <p className="text-sm text-red-600">{error}</p>}
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? 'Creating account...' : 'Sign Up'}
           </Button>
-          {success && <p className="text-sm text-green-600 text-center">Account created! Redirecting to login...</p>}
+          {success && <p className="text-sm text-green-600 text-center">Account created! Check your email to verify.</p>}
         </form>
-        
+
         <div className="text-center text-sm text-muted-foreground">
           <span>Already have an account? </span>
           <a href="/login" className="text-indigo-600 hover:underline">Sign In</a>

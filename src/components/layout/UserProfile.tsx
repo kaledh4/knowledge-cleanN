@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession, signOut } from 'next-auth/react';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -14,24 +14,18 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LogOut, User } from 'lucide-react';
 
 export function UserProfile() {
-  const { data: session } = useSession();
+  const { user, signOut } = useAuth();
 
-  if (!session?.user) {
+  if (!user) {
     return null;
   }
 
-  const handleSignOut = () => {
-    signOut({ redirect: false });
+  const handleSignOut = async () => {
+    await signOut();
   };
 
-  const getInitials = (name?: string, email?: string) => {
-    if (name) {
-      return name.split(' ').map(n => n[0]).join('').toUpperCase();
-    }
-    if (email) {
-      return email.substring(0, 2).toUpperCase();
-    }
-    return 'U';
+  const getInitials = (email: string) => {
+    return email.substring(0, 2).toUpperCase();
   };
 
   return (
@@ -39,9 +33,9 @@ export function UserProfile() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src="" alt={session.user.name || session.user.email || 'User'} />
+            <AvatarImage src="" alt={user.email || 'User'} />
             <AvatarFallback>
-              {getInitials(session.user.name || undefined, session.user.email || undefined)}
+              {getInitials(user.email || 'U')}
             </AvatarFallback>
           </Avatar>
         </Button>
@@ -50,10 +44,10 @@ export function UserProfile() {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">
-              {session.user.name || 'User'}
+              {user.email}
             </p>
             <p className="text-xs leading-none text-muted-foreground">
-              {session.user.email}
+              {user.user_metadata?.name || 'User'}
             </p>
           </div>
         </DropdownMenuLabel>

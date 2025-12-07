@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Brain, Edit3, Trash2, Tag as TagIcon, Search, Plus, Check, X, AlertCircle, Palette, RefreshCw } from 'lucide-react';
+import { Brain, Edit3, Trash2, Tag as TagIcon, Search, Plus, Check, X, AlertCircle, Palette, RefreshCw, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import Link from 'next/link';
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface TagData {
   name: string;
@@ -87,7 +87,7 @@ const PRESET_COLORS = [
 ];
 
 export default function CustomizeTagsPage() {
-  const { data: session } = useSession();
+  const { user } = useAuth();
   const [tags, setTags] = useState<TagData[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -314,7 +314,7 @@ export default function CustomizeTagsPage() {
     }
   };
 
-  if (!session) {
+  if (!user) {
     return (
       <div className="min-h-screen bg-background">
         <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -557,11 +557,11 @@ export default function CustomizeTagsPage() {
                             <Palette className="h-4 w-4" />
                             {tagColors[tag.name] && (
                               <div className="absolute -top-1 -right-1 w-2 h-2 rounded-full"
-                                   style={{
-                                     backgroundColor: PRESET_COLORS.find(c =>
-                                       c.background === tagColors[tag.name].backgroundColor
-                                     )?.hex || '#000'
-                                   }}>
+                                style={{
+                                  backgroundColor: PRESET_COLORS.find(c =>
+                                    c.background === tagColors[tag.name].backgroundColor
+                                  )?.hex || '#000'
+                                }}>
                               </div>
                             )}
                           </Button>
@@ -685,11 +685,10 @@ export default function CustomizeTagsPage() {
                     <button
                       key={color.name}
                       onClick={() => setSelectedColor(color)}
-                      className={`h-12 rounded-lg border-2 transition-all ${
-                        selectedColor.name === color.name
-                          ? 'border-primary scale-105'
-                          : 'border-transparent hover:border-gray-300'
-                      }`}
+                      className={`h-12 rounded-lg border-2 transition-all ${selectedColor.name === color.name
+                        ? 'border-primary scale-105'
+                        : 'border-transparent hover:border-gray-300'
+                        }`}
                       style={{
                         backgroundColor: color.hex + '20',
                         borderColor: selectedColor.name === color.name ? color.hex : undefined

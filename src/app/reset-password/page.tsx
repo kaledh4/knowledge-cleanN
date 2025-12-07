@@ -2,27 +2,27 @@
 
 import React, { Suspense, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession, signOut } from 'next-auth/react';
+import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import Logo from '@/components/layout/Logo';
 
 function ResetPasswordContent() {
-  const { data: session, status } = useSession();
+  const { user, loading, signOut } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (status === 'unauthenticated') {
+    if (!loading && !user) {
       router.push('/login');
     }
-  }, [status, router]);
+  }, [loading, user, router]);
 
-  if (status === 'loading') {
+  if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">Loading...</div>
     );
   }
 
-  if (!session?.user) return null;
+  if (!user) return null;
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-4">
@@ -38,10 +38,10 @@ function ResetPasswordContent() {
         </div>
 
         <div className="space-y-4">
-          <Button 
+          <Button
             variant="outline"
-            onClick={() => {
-              signOut();
+            onClick={async () => {
+              await signOut();
               router.push('/login');
             }}
             className="w-full"

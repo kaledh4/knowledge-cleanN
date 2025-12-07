@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Logo from './Logo';
 import { Button } from '../ui/button';
-import { PlusCircle, Search as SearchIcon, Menu, X, Settings, BrainCircuit } from 'lucide-react';
+import { PlusCircle, Search as SearchIcon, Menu, X, BrainCircuit } from 'lucide-react';
 import type { KnowledgeEntry } from '@/lib/types';
 import Search from '../knowledge/Search';
 import { cn } from '@/lib/utils';
@@ -12,10 +12,9 @@ type HeaderProps = {
   onNewEntry: () => void;
   onSearch: (results: KnowledgeEntry[] | null) => void;
   onAnalyze: () => void;
-  onSettings: () => void;
 };
 
-export default function Header({ onNewEntry, onSearch, onAnalyze, onSettings }: HeaderProps) {
+export default function Header({ onNewEntry, onSearch, onAnalyze }: HeaderProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
 
@@ -71,13 +70,7 @@ export default function Header({ onNewEntry, onSearch, onAnalyze, onSettings }: 
               Analyze
             </Button>
 
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={onSettings}
-            >
-              <Settings className="h-4 w-4" />
-            </Button>
+
           </div>
 
           {/* Mobile Controls */}
@@ -136,18 +129,7 @@ export default function Header({ onNewEntry, onSearch, onAnalyze, onSettings }: 
                   Analyze
                 </Button>
 
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => {
-                    onSettings();
-                    setIsExpanded(false);
-                  }}
-                  className="w-full justify-start"
-                >
-                  <Settings className="mr-2 h-4 w-4" />
-                  Settings
-                </Button>
+
               </div>
             </div>
           </div>

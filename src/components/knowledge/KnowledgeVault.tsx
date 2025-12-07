@@ -1,23 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState } from 'react';
 import type { KnowledgeEntry } from '@/lib/types';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import KnowledgeList from './KnowledgeList';
 import EntryDialog from './EntryDialog';
-import SettingsDialog from './SettingsDialog';
 import { getSupabaseClient } from '@/lib/supabase';
+import { useAuth } from '@/contexts/AuthContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Spinner } from '@/components/ui/spinner';
 import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
+import { AuthDialog } from '@/components/auth/AuthDialog';
 
 export default function KnowledgeVault() {
   const [isEntryDialogOpen, setIsEntryDialogOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const [isAnalysisOpen, setIsAnalysisOpen] = useState(false);
   const [analysisContent, setAnalysisContent] = useState('');
   const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false);
@@ -25,12 +25,7 @@ export default function KnowledgeVault() {
   const [refreshKey, setRefreshKey] = useState(0);
 
   const supabase = getSupabaseClient();
-
-  useEffect(() => {
-    if (!supabase) {
-      setIsSettingsOpen(true);
-    }
-  }, [supabase]);
+  const { user } = useAuth();
 
   const handleSearch = (results: KnowledgeEntry[] | null) => {
     setSearchResults(results);
@@ -41,8 +36,8 @@ export default function KnowledgeVault() {
   };
 
   const fetchLatestAnalysis = async () => {
-    if (!supabase) {
-      setIsSettingsOpen(true);
+    if (!supabase || !user) {
+      setIsAuthDialogOpen(true);
       return;
     }
 
@@ -51,12 +46,6 @@ export default function KnowledgeVault() {
     setAnalysisContent('');
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setAnalysisContent('Please log in to view analysis.');
-        return;
-      }
-
       const { data, error } = await supabase
         .from('insights')
         .select('content, created_at')
@@ -65,7 +54,7 @@ export default function KnowledgeVault() {
         .limit(1)
         .single();
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned"
+      if (error && error.code !== 'PGRST116') {
         throw error;
       }
 
@@ -90,10 +79,10 @@ export default function KnowledgeVault() {
         onSuccess={handleDataChange}
       />
 
-      <SettingsDialog
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        onSave={() => window.location.reload()}
+      <AuthDialog
+        isOpen={isAuthDialogOpen}
+        onClose={() => setIsAuthDialogOpen(false)}
+        onSuccess={handleDataChange}
       />
 
       <Dialog open={isAnalysisOpen} onOpenChange={setIsAnalysisOpen}>
@@ -129,17 +118,16 @@ export default function KnowledgeVault() {
           onNewEntry={() => setIsEntryDialogOpen(true)}
           onSearch={handleSearch}
           onAnalyze={fetchLatestAnalysis}
-          onSettings={() => setIsSettingsOpen(true)}
         />
         <main className="flex-1">
           <div className="container mx-auto max-w-7xl px-4 py-8">
-            {!supabase ? (
+            {!user ? (
               <div className="flex flex-col items-center justify-center py-20 text-center">
                 <h2 className="text-2xl font-bold mb-4">Welcome to KnowledgeVerse</h2>
                 <p className="text-muted-foreground mb-8 max-w-md">
-                  To get started, please configure your Supabase connection in the settings.
+                  Sign in to start building your personal knowledge base.
                 </p>
-                <Button onClick={() => setIsSettingsOpen(true)}>Open Settings</Button>
+                <Button onClick={() => setIsAuthDialogOpen(true)}>Sign In</Button>
               </div>
             ) : (
               <KnowledgeList

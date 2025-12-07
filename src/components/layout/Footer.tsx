@@ -2,17 +2,17 @@
 
 import { Brain, LogOut, Tag } from 'lucide-react';
 import Link from 'next/link';
-import { useSession, signOut } from 'next-auth/react';
+import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 
 export default function Footer() {
-  const { data: session } = useSession();
+  const { user, signOut } = useAuth();
   const router = useRouter();
 
   const handleLogout = async () => {
     try {
-      await signOut({ redirect: false });
+      await signOut();
       router.push('/login');
     } catch (error) {
       console.error('Logout failed:', error);
@@ -73,11 +73,10 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Account */}
           <div className="space-y-4">
             <h3 className="font-semibold">Account</h3>
             <div className="space-y-2">
-              {session?.user && (
+              {user && (
                 <Button
                   size="sm"
                   variant="outline"

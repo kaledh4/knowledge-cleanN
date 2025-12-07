@@ -1,24 +1,23 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { LoginForm } from '@/components/auth/LoginForm';
-import { Separator } from '@/components/ui/separator';
+import { AuthDialog } from '@/components/auth/AuthDialog';
 import { Spinner } from '@/components/ui/spinner';
 import Logo from '@/components/layout/Logo';
 
 export default function LoginPage() {
-  const { data: session, status } = useSession();
+  const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (status === 'authenticated') {
+    if (user) {
       router.push('/');
     }
-  }, [status, router]);
+  }, [user, router]);
 
-  if (status === 'loading' || status === 'authenticated') {
+  if (loading || user) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Spinner size="large" />
@@ -39,7 +38,11 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <LoginForm />
+        <AuthDialog
+          isOpen={true}
+          onClose={() => router.push('/')}
+          onSuccess={() => router.push('/')}
+        />
       </div>
     </div>
   );

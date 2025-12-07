@@ -1,51 +1,33 @@
 'use client';
-import { signIn } from 'next-auth/react';
+
+import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useRouter } from 'next/navigation';
 
 export function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { signIn } = useAuth();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    
-    try {
-      console.log('Attempting login for:', email);
-      
-      const res = await signIn('credentials', {
-        email: email.trim(),
-        password,
-        redirect: false, // Don't redirect automatically
-        callbackUrl: '/',
-      });
-      
-      console.log('Login response:', res);
-      
-      if (res?.error) {
-        console.error('Login error:', res.error);
-        setError(res.error === 'CredentialsSignin' ? 'Invalid email or password' : res.error);
-        setLoading(false);
-      } else if (res?.ok) {
-        console.log('Login successful, redirecting...');
-        // Redirect manually on success
-        window.location.href = res.url || '/';
-      } else {
-        console.error('Unexpected login response:', res);
-        setError('Login failed. Please try again.');
-        setLoading(false);
-      }
-    } catch (error) {
-      console.error('Login exception:', error);
-      setError('Login failed. Please try again.');
+
+    const result = await signIn(email.trim(), password);
+
+    if (result.error) {
+      setError(result.error);
       setLoading(false);
+    } else {
+      router.push('/');
     }
   };
 
@@ -85,7 +67,7 @@ export function LoginForm() {
       </Button>
 
       <div className="text-center text-sm text-muted-foreground">
-        <span>Don’t have an account? </span>
+        <span>Don't have an account? </span>
         <Link href="/sign-up" className="text-indigo-600">Sign Up</Link>
       </div>
     </form>
