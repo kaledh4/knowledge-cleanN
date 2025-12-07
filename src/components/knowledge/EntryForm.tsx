@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { getSupabaseClient } from '@/lib/supabase';
 import { type KnowledgeEntry } from '@/lib/types';
 import { getTagColor } from '@/lib/utils';
+import { createKnowledgeEntry, updateKnowledgeEntry } from '@/lib/knowledge-actions';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -96,25 +97,19 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) throw new Error('Not authenticated');
 
-      const entryData = {
-        title: values.title,
-        content: values.content,
-        tags: values.tags,
-        user_id: user.id,
-        updated_at: new Date().toISOString(),
-      };
-
       if (entry) {
-        const { error } = await supabase
-          .from('knowledge_entries')
-          .update(entryData)
-          .eq('id', entry.id);
-        if (error) throw error;
+        await updateKnowledgeEntry(entry.id, {
+          title: values.title,
+          content: values.content,
+          tags: values.tags,
+        }, user.id);
       } else {
-        const { error } = await supabase
-          .from('knowledge_entries')
-          .insert([{ ...entryData, created_at: new Date().toISOString() }]);
-        if (error) throw error;
+        await createKnowledgeEntry({
+          title: values.title || '',
+          textForEmbedding: values.content,
+          contentType: 'TEXT',
+          tags: values.tags,
+        }, user.id);
       }
 
       toast({

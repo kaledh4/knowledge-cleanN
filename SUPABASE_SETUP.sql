@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS public.entries (
     tags TEXT[] DEFAULT '{}',
     type TEXT DEFAULT 'TEXT',
     url TEXT,
+    metadata JSONB DEFAULT '{}'::jsonb,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
