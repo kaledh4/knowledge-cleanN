@@ -45,7 +45,7 @@ function usePaginatedEntries(refreshKey: number): UsePaginatedEntriesResult {
 
       // Get total count first
       const { count, error: countError } = await supabase
-        .from('knowledge_entries')
+        .from('entries')
         .select('*', { count: 'exact', head: true });
 
       if (countError) throw countError;
@@ -56,7 +56,7 @@ function usePaginatedEntries(refreshKey: number): UsePaginatedEntriesResult {
       const to = from + PAGE_SIZE - 1;
 
       const { data, error: dataError } = await supabase
-        .from('knowledge_entries')
+        .from('entries')
         .select('*')
         .order('created_at', { ascending: false })
         .range(from, to);

@@ -40,7 +40,7 @@ export default function DeleteConfirmationDialog({
     setIsLoading(true);
     try {
       const { error } = await supabase
-        .from('knowledge_entries')
+        .from('entries')
         .delete()
         .eq('id', entry.id);
 

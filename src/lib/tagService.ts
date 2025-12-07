@@ -24,7 +24,7 @@ export async function getUserTags(): Promise<Tag[]> {
 
     // Get all entries for the user
     const { data: entries, error } = await supabase
-        .from('knowledge_entries')
+        .from('entries')
         .select('tags')
         .eq('user_id', user.id);
 
@@ -147,7 +147,7 @@ export async function renameTag(oldName: string, newName: string): Promise<void>
 
     // Get all entries with the old tag
     const { data: entries, error: fetchError } = await supabase
-        .from('knowledge_entries')
+        .from('entries')
         .select('id, tags')
         .eq('user_id', user.id)
         .contains('tags', [oldName]);
@@ -161,7 +161,7 @@ export async function renameTag(oldName: string, newName: string): Promise<void>
         );
 
         const { error: updateError } = await supabase
-            .from('knowledge_entries')
+            .from('entries')
             .update({ tags: updatedTags })
             .eq('id', entry.id);
 
@@ -207,7 +207,7 @@ export async function deleteTag(tagName: string): Promise<void> {
 
     // Get all entries with this tag
     const { data: entries, error: fetchError } = await supabase
-        .from('knowledge_entries')
+        .from('entries')
         .select('id, tags')
         .eq('user_id', user.id)
         .contains('tags', [tagName]);
@@ -219,7 +219,7 @@ export async function deleteTag(tagName: string): Promise<void> {
         const updatedTags = entry.tags.filter((tag: string) => tag !== tagName);
 
         const { error: updateError } = await supabase
-            .from('knowledge_entries')
+            .from('entries')
             .update({ tags: updatedTags })
             .eq('id', entry.id);
 
