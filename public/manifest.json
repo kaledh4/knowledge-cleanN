@@ -1,22 +1,56 @@
 {
-    "name": "KnowledgeVerse",
+    "name": "KnowledgeVerse - Personal Knowledge Management",
     "short_name": "KnowledgeVerse",
-    "description": "Your personal knowledge management system",
-    "start_url": "/",
+    "description": "Your personal knowledge management system. Capture, organize, and discover insights from anywhere.",
+    "start_url": "/knowledge-cleanN/",
+    "scope": "/knowledge-cleanN/",
+    "id": "/knowledge-cleanN/",
     "display": "standalone",
     "background_color": "#0f0f23",
     "theme_color": "#9333ea",
-    "orientation": "portrait",
+    "orientation": "any",
+    "lang": "en",
+    "dir": "ltr",
+    "categories": [
+        "productivity",
+        "education",
+        "utilities"
+    ],
     "icons": [
         {
-            "src": "/static/icons/icon-192.png",
+            "src": "/knowledge-cleanN/static/icons/icon-192.png",
             "sizes": "192x192",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any maskable"
         },
         {
-            "src": "/static/icons/icon-512.png",
+            "src": "/knowledge-cleanN/static/icons/icon-512.png",
             "sizes": "512x512",
-            "type": "image/png"
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "/knowledge-cleanN/static/icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "form_factor": "wide",
+            "label": "KnowledgeVerse Home Screen"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Add Entry",
+            "short_name": "Add",
+            "description": "Add a new knowledge entry",
+            "url": "/knowledge-cleanN/?action=add",
+            "icons": [
+                {
+                    "src": "/knowledge-cleanN/static/icons/icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
         }
     ]
 }

@@ -213,20 +213,20 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
                   </div>
 
                   {/* Selected Tags */}
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2.5">
                     {field.value.map((tag) => (
                       <Badge
                         key={tag}
-                        className={`flex items-center gap-1 ${getTagColor(tag)}`}
+                        className={`flex items-center gap-1.5 px-3.5 py-1.5 text-sm transition-all duration-200 hover:scale-105 ${getTagColor(tag)}`}
                         variant="outline"
                       >
                         {tag}
                         <button
                           type="button"
                           onClick={() => removeTag(tag)}
-                          className="ml-1 hover:bg-black/10 rounded-full p-0.5"
+                          className="ml-1 hover:bg-white/20 rounded-full p-1 transition-colors"
                         >
-                          <X className="h-3 w-3" />
+                          <X className="h-3.5 w-3.5" />
                         </button>
                       </Badge>
                     ))}
@@ -234,15 +234,15 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
 
                   {/* Suggested Tags */}
                   {suggestedTags.length > 0 && (
-                    <div className="space-y-2">
-                      <p className="text-xs text-muted-foreground">Suggested Tags:</p>
-                      <ScrollArea className="h-20 w-full rounded-md border bg-muted/20 p-2">
-                        <div className="flex flex-wrap gap-2">
+                    <div className="space-y-2.5">
+                      <p className="text-sm font-medium text-muted-foreground">Suggested Tags:</p>
+                      <ScrollArea className="h-24 w-full rounded-lg border border-white/10 bg-card/30 backdrop-blur-sm p-3">
+                        <div className="flex flex-wrap gap-2.5">
                           {suggestedTags.map((tag) => (
                             <Badge
                               key={tag.name}
                               variant="outline"
-                              className={`cursor-pointer transition-colors ${getTagColor(tag.name)}`}
+                              className={`cursor-pointer px-3.5 py-1.5 text-sm transition-all duration-200 hover:scale-105 ${getTagColor(tag.name)}`}
                               onClick={() => addTag(tag.name)}
                             >
                               {tag.name}

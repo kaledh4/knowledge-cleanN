@@ -83,18 +83,18 @@ export default function KnowledgeCard({ entry, onUpdate, onDelete }: KnowledgeCa
         onSuccess={onDelete}
       />
       <Card
-        className="glass-card flex h-full transform-gpu flex-col transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-cyan-500/20 hover:shadow-lg cursor-pointer relative overflow-hidden border-white/5"
+        className="glass-card flex h-full transform-gpu flex-col transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-cyan-500/20 hover:shadow-lg cursor-pointer relative overflow-hidden border-white/5 p-1"
         onClick={handleCardClick}
         style={{ direction: textDirection } as React.CSSProperties}
       >
-        <CardHeader>
+        <CardHeader className="pb-3">
           <div className={cn(
-            "flex items-start justify-between",
+            "flex items-start justify-between gap-3",
             textDirection === 'rtl' && "flex-row-reverse"
           )}>
             <CardTitle className={cn(
-              "font-headline text-lg font-bold leading-tight line-clamp-2",
-              textDirection === 'rtl' && "text-right"
+              "font-headline text-xl font-bold leading-tight line-clamp-2 tracking-tight",
+              textDirection === 'rtl' && "text-right font-arabic"
             )}>
               {entry.title || 'Untitled'}
             </CardTitle>
@@ -103,7 +103,7 @@ export default function KnowledgeCard({ entry, onUpdate, onDelete }: KnowledgeCa
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 flex-shrink-0"
+                  className="h-8 w-8 flex-shrink-0 hover:bg-white/10"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <MoreVertical className="h-4 w-4" />
@@ -126,25 +126,25 @@ export default function KnowledgeCard({ entry, onUpdate, onDelete }: KnowledgeCa
             </DropdownMenu>
           </div>
           <CardDescription className={cn(
-            "flex items-center pt-1 text-xs text-muted-foreground",
+            "flex items-center pt-1.5 text-xs text-muted-foreground",
             textDirection === 'rtl' && "flex-row-reverse"
           )}>
             <Icon className={cn(
-              "h-3 w-3",
+              "h-3.5 w-3.5",
               textDirection === 'rtl' ? "ml-2 mr-0" : "mr-2 ml-0"
             )} />
             <span>Added {timeAgo}</span>
           </CardDescription>
         </CardHeader>
-        <CardContent className="flex-grow">
+        <CardContent className="flex-grow pb-3">
           <p className={cn(
-            "text-sm text-foreground/80 line-clamp-3",
-            textDirection === 'rtl' && "text-right"
+            "text-[15px] leading-relaxed text-foreground/90 line-clamp-3",
+            textDirection === 'rtl' && "text-right font-arabic"
           )}>
             {entry.content}
           </p>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="pt-0">
           <div className={cn(
             "flex flex-wrap gap-2",
             textDirection === 'rtl' && "justify-end"
@@ -153,7 +153,10 @@ export default function KnowledgeCard({ entry, onUpdate, onDelete }: KnowledgeCa
               <Badge
                 key={tag}
                 variant="outline"
-                className={cn(getTagColor(tag))}
+                className={cn(
+                  getTagColor(tag),
+                  "px-3 py-1 text-xs transition-all duration-200 hover:scale-105"
+                )}
               >
                 {tag}
               </Badge>

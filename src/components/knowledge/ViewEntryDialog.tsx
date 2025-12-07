@@ -68,17 +68,17 @@ export default function ViewEntryDialog({ isOpen, setIsOpen, entry }: ViewEntryD
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-[800px] max-h-[80vh] flex flex-col" dir={textDirection}>
-        <DialogHeader className="flex-shrink-0">
+      <DialogContent className="sm:max-w-[800px] max-h-[85vh] flex flex-col" dir={textDirection}>
+        <DialogHeader className="flex-shrink-0 pb-4">
           <DialogTitle className={cn(
-            "font-headline text-2xl text-primary flex items-center gap-2",
-            textDirection === 'rtl' && "flex-row-reverse text-right"
+            "font-headline text-2xl md:text-3xl font-bold tracking-tight text-primary flex items-center gap-3",
+            textDirection === 'rtl' && "flex-row-reverse text-right font-arabic"
           )}>
-            <Icon className="h-6 w-6" />
+            <Icon className="h-7 w-7" />
             {entry.title || 'Untitled'}
           </DialogTitle>
           <DialogDescription className={cn(
-            "flex items-center gap-2 text-sm text-muted-foreground",
+            "flex items-center gap-2 text-sm text-muted-foreground pt-2",
             textDirection === 'rtl' && "flex-row-reverse"
           )}>
             <span>Added {timeAgo}</span>
@@ -90,26 +90,26 @@ export default function ViewEntryDialog({ isOpen, setIsOpen, entry }: ViewEntryD
           textDirection === 'rtl' ? "pl-2 pr-2" : "pr-2 pl-2"
         )}>
           {/* Content */}
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div className={cn(
               "flex items-center justify-between",
               textDirection === 'rtl' && "flex-row-reverse"
             )}>
-              <h4 className="text-sm font-medium text-foreground">Content</h4>
+              <h4 className="text-base font-semibold text-foreground">Content</h4>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={handleCopyContent}
-                className="flex items-center gap-2 text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-colors"
               >
-                <Copy className="h-3 w-3" />
+                <Copy className="h-4 w-4" />
                 Copy
               </Button>
             </div>
-            <div className="rounded-md border bg-muted/30 p-4 max-h-96 overflow-y-auto">
+            <div className="rounded-lg border border-white/10 bg-card/40 backdrop-blur-sm p-5 max-h-96 overflow-y-auto">
               <p className={cn(
-                "text-sm text-foreground whitespace-pre-wrap select-text leading-relaxed",
-                textDirection === 'rtl' && "text-right"
+                "text-[15px] leading-loose text-foreground/95 whitespace-pre-wrap select-text",
+                textDirection === 'rtl' && "text-right font-arabic"
               )}>
                 {entry.content}
               </p>
@@ -139,14 +139,21 @@ export default function ViewEntryDialog({ isOpen, setIsOpen, entry }: ViewEntryD
 
           {/* Tags */}
           {entry.tags && entry.tags.length > 0 && (
-            <div className="space-y-2">
-              <h4 className="text-sm font-medium text-foreground">Tags</h4>
+            <div className="space-y-3">
+              <h4 className="text-base font-semibold text-foreground">Tags</h4>
               <div className={cn(
-                "flex flex-wrap gap-2",
+                "flex flex-wrap gap-2.5",
                 textDirection === 'rtl' && "justify-end"
               )}>
                 {entry.tags.map(tag => (
-                  <Badge key={tag} variant="outline" className={cn(getTagColor(tag))}>
+                  <Badge
+                    key={tag}
+                    variant="outline"
+                    className={cn(
+                      getTagColor(tag),
+                      "px-3.5 py-1.5 text-sm font-medium transition-all duration-200 hover:scale-105 cursor-default"
+                    )}
+                  >
                     {tag}
                   </Badge>
                 ))}

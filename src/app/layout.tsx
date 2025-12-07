@@ -1,6 +1,25 @@
 import type { Metadata } from "next";
+import { Inter, Space_Grotesk, Noto_Sans_Arabic } from 'next/font/google';
 import "./globals.css";
 import Body from "@/components/layout/Body";
+
+const inter = Inter({
+  subsets: ['latin'],
+  variable: '--font-inter',
+  display: 'swap',
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  variable: '--font-space-grotesk',
+  display: 'swap',
+});
+
+const notoSansArabic = Noto_Sans_Arabic({
+  subsets: ['arabic'],
+  variable: '--font-noto-arabic',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: "KnowledgeVerse",
@@ -13,9 +32,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en" className={`dark ${inter.variable} ${spaceGrotesk.variable} ${notoSansArabic.variable}`}>
       <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
@@ -23,8 +42,11 @@ export default function RootLayout({
         <meta name="application-name" content="KnowledgeVerse" />
         <meta name="msapplication-TileColor" content="#9333ea" />
         <meta name="theme-color" content="#9333ea" />
-        <link rel="manifest" href="/manifest.json" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/static/icons/icon-192.png" />
+        <link rel="manifest" href="/knowledge-cleanN/manifest.json" />
+        <link rel="apple-touch-icon" sizes="192x192" href="/knowledge-cleanN/static/icons/icon-192.png" />
+        <link rel="apple-touch-icon" sizes="512x512" href="/knowledge-cleanN/static/icons/icon-512.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/knowledge-cleanN/static/icons/icon-192.png" />
+        <meta name="msapplication-config" content="none" />
         <style>
           {`
             body.loading .splash-screen {
@@ -56,7 +78,7 @@ export default function RootLayout({
           `}
         </style>
       </head>
-      <body className="antialiased">
+      <body className="antialiased font-body">
         <Body>{children}</Body>
       </body>
     </html>
