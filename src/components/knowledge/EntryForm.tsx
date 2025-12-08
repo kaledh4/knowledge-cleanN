@@ -44,7 +44,6 @@ type EntryFormProps = {
 
 export default function EntryForm({ entry, onSuccess, initialData }: EntryFormProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [newTag, setNewTag] = useState('');
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [userTagColors, setUserTagColors] = useState<Record<string, TagColor>>({});
   const { toast } = useToast();
@@ -98,7 +97,7 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
     loadTagsAndColors();
   }, []);
 
-  const addTag = (tagToAdd: string = newTag) => {
+  const addTag = (tagToAdd: string) => {
     if (!tagToAdd.trim()) return;
     const currentTags = form.getValues('tags') || [];
     const normalizedTag = tagToAdd.trim();
@@ -107,7 +106,6 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
     if (!currentTags.some(t => t.toLowerCase() === normalizedTag.toLowerCase())) {
       form.setValue('tags', [...currentTags, normalizedTag]);
     }
-    setNewTag('');
   };
 
   const removeTag = (tagToRemove: string) => {
@@ -222,23 +220,7 @@ export default function EntryForm({ entry, onSuccess, initialData }: EntryFormPr
               <FormLabel className="text-base font-medium">Tags</FormLabel>
               <FormControl>
                 <div className="space-y-4">
-                  <div className="flex gap-2">
-                    <Input
-                      value={newTag}
-                      onChange={(e) => setNewTag(e.target.value)}
-                      placeholder="Add a tag..."
-                      className="bg-background/50 h-10 font-body"
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          addTag();
-                        }
-                      }}
-                    />
-                    <Button type="button" variant="outline" onClick={() => addTag()} className="h-10 px-4">
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  {/* Manual tag input removed as per request */}
 
                   {/* Selected Tags */}
                   {field.value.length > 0 && (

@@ -42,29 +42,60 @@ function getDefaultTagColor(tag: string): string {
 }
 
 /**
- * Get the border color for a card based on its first tag
+ * Get card styles (border, shadow, stripe) based on the first tag
  */
-export function getCardBorderColor(
+export function getCardStyles(
     firstTag: string | undefined,
     tagColors: Record<string, TagColor>
-): string {
-    if (!firstTag) return 'border-l-primary/30';
-
-    //Check if user has custom color
-    if (tagColors[firstTag]) {
-        // Extract the border color and make it more prominent for the card border
-        const borderColor = tagColors[firstTag].border_color;
-        return `border-l-4 ${borderColor.replace('/40', '/80')}`;
-    }
-
-    // Fallback to color based on tag name
-    const colorMap: Record<string, string> = {
-        'A.I': 'border-l-purple-500',
-        'LIFE': 'border-l-blue-500',
-        'READ': 'border-l-green-500',
-        'Research': 'border-l-pink-500',
-        'WORK': 'border-l-orange-500',
+): { borderColor: string; shadowColor: string; stripeColor: string } {
+    const defaultStyles = {
+        borderColor: 'border-white/10',
+        shadowColor: 'shadow-primary/5',
+        stripeColor: 'bg-primary/20'
     };
 
-    return `border-l-4 ${colorMap[firstTag] || 'border-l-primary/50'}`;
+    if (!firstTag) return defaultStyles;
+
+    // Helper to extract color name from class (e.g., 'border-red-500/50' -> 'red-500')
+    const extractColor = (className: string) => {
+        const match = className.match(/border-([a-z]+-\d+)/);
+        return match ? match[1] : null;
+    };
+
+    if (tagColors[firstTag]) {
+        const colorClass = tagColors[firstTag].border_color;
+        const colorName = extractColor(colorClass);
+
+        if (colorName) {
+            return {
+                borderColor: `border-${colorName}/50`,
+                shadowColor: `shadow-${colorName}/20`,
+                stripeColor: `bg-${colorName}`
+            };
+        }
+    }
+
+    // Fallback logic if no custom color or regex fails
+    // We can try to guess from the default tag colors if needed, but for now return a safe default
+    // or try to match the fallback colors from getDefaultTagColor
+
+    // Simple fallback map for common colors if regex fails
+    const fallbackMap: Record<string, string> = {
+        'A.I': 'purple-500',
+        'LIFE': 'blue-500',
+        'READ': 'green-500',
+        'Research': 'pink-500',
+        'WORK': 'orange-500',
+    };
+
+    const fallbackColor = fallbackMap[firstTag];
+    if (fallbackColor) {
+        return {
+            borderColor: `border-${fallbackColor}/50`,
+            shadowColor: `shadow-${fallbackColor}/20`,
+            stripeColor: `bg-${fallbackColor}`
+        };
+    }
+
+    return defaultStyles;
 }

@@ -25,7 +25,7 @@ import ViewEntryDialog from './ViewEntryDialog';
 import DeleteConfirmationDialog from './DeleteConfirmationDialog';
 import { cn } from '@/lib/utils';
 import { TagColor } from '@/lib/tagService';
-import { getTagColorClasses, getCardBorderColor } from '@/lib/tag-utils';
+import { getTagColorClasses, getCardStyles } from '@/lib/tag-utils';
 
 type KnowledgeCardProps = {
   entry: KnowledgeEntry;
@@ -67,7 +67,7 @@ export default function KnowledgeCard({ entry, onUpdate, onDelete, tagColors = {
   };
 
   const firstTag = entry.tags && entry.tags.length > 0 ? entry.tags[0] : undefined;
-  const borderClass = getCardBorderColor(firstTag, tagColors);
+  const { borderColor, shadowColor, stripeColor } = getCardStyles(firstTag, tagColors);
 
   return (
     <>
@@ -90,12 +90,21 @@ export default function KnowledgeCard({ entry, onUpdate, onDelete, tagColors = {
       />
       <Card
         className={cn(
-          "glass-card flex h-full transform-gpu flex-col transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-cyan-500/20 hover:shadow-lg cursor-pointer relative overflow-hidden p-1",
-          borderClass
+          "glass-card flex h-full transform-gpu flex-col transition-all duration-300 ease-out hover:-translate-y-1 cursor-pointer relative overflow-hidden p-1 border group",
+          borderColor,
+          shadowColor,
+          "hover:shadow-lg"
         )}
         onClick={handleCardClick}
         style={{ direction: textDirection } as React.CSSProperties}
       >
+        {/* Decorative Stripe */}
+        <div className={cn(
+          "absolute top-0 bottom-0 w-1.5 opacity-60 transition-opacity group-hover:opacity-100",
+          textDirection === 'rtl' ? "left-0" : "right-0",
+          stripeColor
+        )} />
+
         <CardHeader className="pb-3">
           <div className={cn(
             "flex items-start justify-between gap-3",
