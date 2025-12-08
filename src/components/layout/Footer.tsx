@@ -2,6 +2,7 @@
 
 import { Brain, LogOut, Tag } from 'lucide-react';
 import Link from 'next/link';
+import Logo from './Logo';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -25,10 +26,7 @@ export default function Footer() {
         <div className="grid gap-8 md:grid-cols-4">
           {/* Brand */}
           <div className="space-y-4">
-            <div className="flex items-center space-x-2">
-              <Brain className="h-6 w-6 text-primary" />
-              <span className="font-headline text-xl font-bold">KnowledgeVerse</span>
-            </div>
+            <Logo />
             <p className="text-sm text-muted-foreground">
               Your personal knowledge management system. Capture, organize, and discover insights from anywhere.
             </p>

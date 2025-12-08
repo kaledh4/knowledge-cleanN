@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -23,15 +23,18 @@ import { formatDistanceToNow } from 'date-fns';
 import EntryDialog from './EntryDialog';
 import ViewEntryDialog from './ViewEntryDialog';
 import DeleteConfirmationDialog from './DeleteConfirmationDialog';
-import { cn, getTagColor } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { TagColor } from '@/lib/tagService';
+import { getTagColorClasses, getCardBorderColor } from '@/lib/tag-utils';
 
 type KnowledgeCardProps = {
   entry: KnowledgeEntry;
   onUpdate: () => void;
   onDelete: () => void;
+  tagColors?: Record<string, TagColor>;
 };
 
-export default function KnowledgeCard({ entry, onUpdate, onDelete }: KnowledgeCardProps) {
+export default function KnowledgeCard({ entry, onUpdate, onDelete, tagColors = {} }: KnowledgeCardProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -63,6 +66,9 @@ export default function KnowledgeCard({ entry, onUpdate, onDelete }: KnowledgeCa
     setIsViewDialogOpen(true);
   };
 
+  const firstTag = entry.tags && entry.tags.length > 0 ? entry.tags[0] : undefined;
+  const borderClass = getCardBorderColor(firstTag, tagColors);
+
   return (
     <>
       <EntryDialog
@@ -83,7 +89,10 @@ export default function KnowledgeCard({ entry, onUpdate, onDelete }: KnowledgeCa
         onSuccess={onDelete}
       />
       <Card
-        className="glass-card flex h-full transform-gpu flex-col transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-cyan-500/20 hover:shadow-lg cursor-pointer relative overflow-hidden border-white/5 p-1"
+        className={cn(
+          "glass-card flex h-full transform-gpu flex-col transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-cyan-500/20 hover:shadow-lg cursor-pointer relative overflow-hidden p-1",
+          borderClass
+        )}
         onClick={handleCardClick}
         style={{ direction: textDirection } as React.CSSProperties}
       >
@@ -154,8 +163,8 @@ export default function KnowledgeCard({ entry, onUpdate, onDelete }: KnowledgeCa
                 key={tag}
                 variant="outline"
                 className={cn(
-                  getTagColor(tag),
-                  "px-3 py-1 text-xs transition-all duration-200 hover:scale-105"
+                  getTagColorClasses(tag, tagColors),
+                  "px-3 py-1 text-xs transition-all duration-200 hover:scale-105 cursor-default"
                 )}
               >
                 {tag}

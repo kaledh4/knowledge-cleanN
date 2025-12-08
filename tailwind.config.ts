@@ -17,9 +17,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        body: ['-apple-system', 'BlinkMacSystemFont', 'San Francisco', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'sans-serif'],
-        headline: ['-apple-system', 'BlinkMacSystemFont', 'San Francisco', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'sans-serif'],
-        arabic: ['var(--font-cairo)', 'Cairo', 'sans-serif'],
+        body: ['var(--font-ibm-arabic)', 'IBM Plex Sans Arabic', 'sans-serif'],
+        headline: ['var(--font-ibm-arabic)', 'IBM Plex Sans Arabic', 'sans-serif'],
+        arabic: ['var(--font-ibm-arabic)', 'IBM Plex Sans Arabic', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {

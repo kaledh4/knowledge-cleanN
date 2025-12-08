@@ -7,6 +7,7 @@ import KnowledgeCard from './KnowledgeCard';
 import { Button } from '../ui/button';
 import { Spinner } from '../ui/spinner';
 import { Inbox, ChevronLeft, ChevronRight } from 'lucide-react';
+import { getTagColors, TagColor } from '@/lib/tagService';
 
 type KnowledgeListProps = {
   searchResults: KnowledgeEntry[] | null;
@@ -120,6 +121,20 @@ export default function KnowledgeList({ searchResults, onDataChange, refreshKey 
     goToPage
   } = usePaginatedEntries(refreshKey);
 
+  const [userTagColors, setUserTagColors] = useState<Record<string, TagColor>>({});
+
+  useEffect(() => {
+    const loadColors = async () => {
+      try {
+        const colors = await getTagColors();
+        setUserTagColors(colors);
+      } catch (error) {
+        console.error('Failed to load tag colors:', error);
+      }
+    };
+    loadColors();
+  }, [refreshKey]);
+
   if (isLoading && entries.length === 0) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -176,7 +191,13 @@ export default function KnowledgeList({ searchResults, onDataChange, refreshKey 
     <div>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         {entriesToShow.map(entry => (
-          <KnowledgeCard key={entry.id} entry={entry} onUpdate={onDataChange} onDelete={onDataChange} />
+          <KnowledgeCard
+            key={entry.id}
+            entry={entry}
+            onUpdate={onDataChange}
+            onDelete={onDataChange}
+            tagColors={userTagColors}
+          />
         ))}
       </div>
 

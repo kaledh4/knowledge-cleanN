@@ -1,29 +1,13 @@
 import type { Metadata } from "next";
-import { Cairo, Plus_Jakarta_Sans, Outfit } from 'next/font/google';
+import { IBM_Plex_Sans_Arabic } from 'next/font/google';
 import "./globals.css";
 import Body from "@/components/layout/Body";
 
-// Plus Jakarta Sans - Modern, clean, professional body font
-const plusJakarta = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-jakarta',
-  display: 'swap',
-});
-
-// Cairo - Premium Arabic font with Latin support
-const cairo = Cairo({
+// IBM Plex Sans Arabic - The single unified font for the entire app
+const ibmPlexArabic = IBM_Plex_Sans_Arabic({
   subsets: ['arabic', 'latin'],
-  weight: ['400', '500', '600', '700', '800', '900'],
-  variable: '--font-cairo',
-  display: 'swap',
-});
-
-// Outfit - Bold, modern headlines
-const outfit = Outfit({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800', '900'],
-  variable: '--font-outfit',
+  weight: ['100', '200', '300', '400', '500', '600', '700'],
+  variable: '--font-ibm-arabic',
   display: 'swap',
 });
 
@@ -38,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`dark ${plusJakarta.variable} ${outfit.variable} ${cairo.variable}`}>
+    <html lang="en" className={`dark ${ibmPlexArabic.variable}`}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes" />
         <meta name="mobile-web-app-capable" content="yes" />
