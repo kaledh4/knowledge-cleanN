@@ -17,6 +17,7 @@ export default {
     },
     extend: {
       fontFamily: {
+        sans: ['var(--font-ibm-arabic)', 'IBM Plex Sans Arabic', 'sans-serif'], // Override default sans
         body: ['var(--font-ibm-arabic)', 'IBM Plex Sans Arabic', 'sans-serif'],
         headline: ['var(--font-ibm-arabic)', 'IBM Plex Sans Arabic', 'sans-serif'],
         arabic: ['var(--font-ibm-arabic)', 'IBM Plex Sans Arabic', 'sans-serif'],

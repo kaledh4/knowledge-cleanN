@@ -82,6 +82,7 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-ibm-arabic), 'IBM Plex Sans Arabic', sans-serif;
     background-image:
       radial-gradient(circle at 15% 50%, rgba(100, 50, 255, 0.15), transparent 35%),
       radial-gradient(circle at 85% 30%, rgba(0, 255, 255, 0.15), transparent 35%);
@@ -95,10 +96,10 @@
     line-height: 1.6;
   }
 
-  /* Better Arabic text rendering with Cairo */
+  /* Better Arabic text rendering with IBM Plex Sans Arabic */
   [dir="rtl"],
   .rtl {
-    font-family: var(--font-cairo), 'Cairo', sans-serif;
+    font-family: var(--font-ibm-arabic), 'IBM Plex Sans Arabic', sans-serif;
     letter-spacing: 0;
     line-height: 1.9;
     font-weight: 500;

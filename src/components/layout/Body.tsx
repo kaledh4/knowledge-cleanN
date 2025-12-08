@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Image from 'next/image';
 import Providers from '@/components/providers/Providers';
+import Logo from './Logo';
 
 export default function Body({ children }: { children: React.ReactNode }) {
   const [bodyClassName, setBodyClassName] = useState('antialiased');
@@ -23,7 +23,7 @@ export default function Body({ children }: { children: React.ReactNode }) {
   return (
     <>
       <div className="splash-screen">
-        <Image src="/static/logo.png" className="logo" alt="KnowledgeVerse Logo" width={120} height={120} />
+        <Logo size="lg" className="scale-150" />
       </div>
       <div className="main-content">
         <Providers>{children}</Providers>
@@ -33,8 +33,8 @@ export default function Body({ children }: { children: React.ReactNode }) {
           __html: `
             if ('serviceWorker' in navigator) {
               window.addEventListener('load', () => {
-                // Get the base path from Next.js config (for GitHub Pages)
-                const basePath = '${process.env.NEXT_PUBLIC_BASE_PATH || ''}';
+                // Hardcoded base path for GitHub Pages
+                const basePath = '/knowledge-cleanN';
                 const swPath = basePath + '/sw.js';
                 
                 navigator.serviceWorker.register(swPath, { 
@@ -44,7 +44,6 @@ export default function Body({ children }: { children: React.ReactNode }) {
                 }).catch(registrationError => {
                   console.warn('⚠️ Service Worker registration failed:', registrationError.message);
                   console.log('App will continue to work without offline support.');
-                  // Gracefully degrade - app works fine without SW
                 });
               });
             }
